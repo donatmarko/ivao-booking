@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+body {
+	padding-top: 5rem;
+}
+h1 { margin-bottom: 2rem }
+.navbar-nav > .nav-item {
+	padding: 0 0.7em;
+}
+#arrDepTab > .nav-item {
+	width: 50%;
+	text-align: center;
+}
+
+/* Flight list */
+.tblFlights { font-size: 95% }
+.airport {
+	margin-bottom: 3rem;
+	border: 1px solid #ddd;
+	padding: 1rem;
+	box-sizing: border-box
+}
+
+/* Flight tiles in modal_flight */
+.flighttiles { padding: 0.7rem; }
+.flighttiles > .row .big { font-size: 170%; }
+.flighttiles > .row .text-small { font-size: 90%; }
+.flighttiles > .row .head { border-bottom: 6px solid #eee }
+.flighttiles > .row .foot { margin-bottom: 0.5rem; }
+.flighttiles > .row img { margin: auto 0 }
+.wxResult {
+	background-color: #f5f5f5;
+	display: none;
+	padding: 0.7rem;
+	font-family: Consolas, 'Ubuntu Mono', 'Courier New', courier;
+	margin-bottom: 1rem
+}
+.flightCollapses { margin: 1rem 0 }
+.flightCollapses button { margin-top: 0.25rem }
+.map {
+	width: 100%;
+	height: 350px
+}
+
+/* Banner */
+.banner > .jumbotron { border-radius: 0 }
+.banner > img {
+	border-top-left-radius: 25px;
+	border-top-right-radius: 25px
+}
+.banner > .jumbotron {
+	border-bottom-left-radius: 25px;
+	border-bottom-right-radius: 25px
+}
+
+/* Loader spinning circle */
+.loader {
+	position: fixed;
+	border: 16px solid #f3f3f3;
+	border-radius: 50%;
+	border-top: 16px solid #3498db;
+	width: 120px;
+	height: 120px;
+	-webkit-animation: spin 2s linear infinite;
+	animation: spin 2s linear infinite;
+	top: 50%;
+	left: 50%;
+	margin-top: -60px;
+	margin-left: -60px;
+	z-index: 5000;
+	display: none;
+}
+@-webkit-keyframes spin {
+	0% { -webkit-transform: rotate(0deg); }
+	100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Footer */
+.footer {
+	margin-top: 5em;
+	padding: 2.5rem 0;
+	color: #888;
+	background-color: #f0f0f0;
+	border-top: .05rem solid #e0e0e0;
+	font-size: 85%
+}
+.footer p { margin-bottom: 0.5em }
+
+/* Bootstrap callouts */
+.bd-callout {
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #eee;
+    border-left-width: .25rem;
+    border-radius: .25rem
+}
+.bd-callout h4 {
+    margin-top: 0;
+    margin-bottom: .25rem
+}
+.bd-callout p:last-child {
+    margin-bottom: 0
+}
+.bd-callout code {
+    border-radius: .25rem
+}
+.bd-callout+.bd-callout {
+    margin-top: -.25rem
+}
+.bd-callout-info {
+    border-left-color: #5bc0de
+}
+.bd-callout-info h4 {
+    color: #5bc0de
+}
+.bd-callout-warning {
+    border-left-color: #f0ad4e
+}
+.bd-callout-warning h4 {
+    color: #f0ad4e
+}
+.bd-callout-danger {
+    border-left-color: #d9534f
+}
+.bd-callout-danger h4 {
+    color: #d9534f
+}
+
+input.input-uppercase { 
+    text-transform: uppercase;
+}
+::-webkit-input-placeholder { /* WebKit browsers */
+    text-transform: none;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    text-transform: none;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    text-transform: none;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+    text-transform: none;
+}
+::placeholder { /* Recent browsers */
+    text-transform: none;
+}
+
+.swal2-confirm,
+.swal2-cancel { margin: 0 0.5rem }
+
+/* chevron on collapse */
+[data-toggle="collapse"]:after {
+	display: inline-block;
+	font: normal normal 900 1rem 'Font Awesome\ 5 Free';
+	padding: 0 0.5rem;
+	content: "\f077";
+	transform: rotate(0deg);
+	transition: all linear 0.25s;
+}   
+[data-toggle="collapse"].collapsed:after {
+	transform: rotate(180deg);
+}
+.navbar-toggler:after {
+	content: '';
+	display: none;
+}
+
+span.turnoverIcon:after {
+	content: "\f2f1";
+	display: inline-block;
+	font: normal normal 900 0.8rem 'Font Awesome\ 5 Free';
+	padding-left: 0.4rem;
+	-webkit-animation: rotation 2s infinite linear;
+	animation: rotation 2s infinite linear;
+	transform-origin: 70% 50%;
+}
+@-webkit-keyframes rotation {
+	from {
+		-webkit-transform: rotate(0deg);
+	}
+	to {
+		-webkit-transform: rotate(359deg);
+	}
+}

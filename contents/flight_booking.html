@@ -1,0 +1,47 @@
+<p>Dear %flt_bookerFirstname%,</p>
+
+<p>A scheduled flight has been <strong>pre-booked</strong> with your IVAO account.</p>
+
+<p>
+	<table border="1" style="border-collapse: collapse">
+		<tr>
+			<th>Flight number</th>
+			<td>%flt_flightNumber%</td>
+		</tr>
+		<tr>
+			<th>Callsign</th>
+			<td>%flt_callsign%</td>
+		</tr>
+		<tr>
+			<th>Aircraft</th>
+			<td>%flt_aircraft%</td>
+		</tr>
+		<tr>
+			<th>Departure</th>
+			<td>%flt_departure%</td>
+		</tr>
+		<tr>
+			<th>Destination</th>
+			<td>%flt_destination%</td>
+		</tr>
+		<tr>
+			<th>Route</th>
+			<td>%flt_route%</td>
+		</tr>
+		<tr>
+			<th>Position</th>
+			<td>%flt_position%</td>
+		</tr>
+	</table>
+	<em>Please note that the flight data (especially terminal/gate) might change in the meantime. Check the booking page regularly!</em>
+</p>
+
+<p>If you have real intentions to accomplish this flight, in order to confirm your booking, please click the following link: <a href="%url%/?f=token&id=%flt_token%">%url%/?f=token&id=%flt_token%</a>.</p>
+
+<p>If you can't fly this flight, please <a href="%url%/mybookings">delete your booking in the booking system</a> to give chance to the others to book this particular one.
+
+<p>The flight remains in pre-booked state until it has been confirmed. If the interest become high on the flights, the Events staff might decide to delete the unconfirmed bookings to give opportunity for the newcomers to book their favourite flight.</p>
+
+
+<p><br>Sincerely yours,<br>
+%division_name% Events staff</p>
