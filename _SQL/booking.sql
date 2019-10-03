@@ -23,6 +23,18 @@ CREATE TABLE `config` (
   `value` varchar(50) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
 
+INSERT INTO `config` (`key`, `value`) VALUES
+('mode', '0'),
+('division_name', 'IVAO Vatican'),
+('event_name', 'Vatican RFE'),
+('division_web', 'https://va.ivao.aero'),
+('division_facebook', 'https://www.facebook.com/IVAO.Vatican/'),
+('division_twitter', ''),
+('date_start', '2019-08-19 10:00:00'),
+('division_email', 'events@va.ivao.aero'),
+('wx_url', 'https://api.donatus.hu/oavi/wx.php'),
+('date_end', '2019-08-19 22:00:00');
+
 CREATE TABLE `flights` (
   `id` int(11) NOT NULL,
   `flight_number` varchar(10) NOT NULL,
