@@ -1,0 +1,41 @@
+version: 2
+updates:
+- package-ecosystem: composer
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: phpmailer/phpmailer
+    versions:
+    - 6.2.0
+    - 6.3.0
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: sweetalert2
+    versions:
+    - 10.14.0
+    - 10.14.1
+    - 10.15.0
+    - 10.15.1
+    - 10.15.2
+    - 10.15.4
+    - 10.15.5
+    - 10.15.6
+    - 10.15.7
+    - 10.16.0
+    - 10.16.2
+    - 10.16.4
+    - 10.16.5
+  - dependency-name: "@fortawesome/fontawesome-free"
+    versions:
+    - 5.15.2
+  - dependency-name: jquery
+    versions:
+    - 3.5.1
