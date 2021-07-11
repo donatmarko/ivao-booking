@@ -61,7 +61,7 @@ class Email
 
 		$cfg_smtp = new PHPMailer\PHPMailer\PHPMailer(true);
 		try
-        {        
+        {       
             $cfg_smtp->SMTPDebug = 0;
             $cfg_smtp->isSMTP();                    
             $cfg_smtp->Host = $config["mail_smtp_server"];
@@ -75,10 +75,10 @@ class Email
             // set from
             if (is_string($from))
                 $cfg_smtp->setFrom($from);
-            else if (!property_exists($from, 'name'))
-                $cfg_smtp->setFrom($from->email);
+            else if (!array_key_exists('name', $from))
+                $cfg_smtp->setFrom($from['email']);
             else
-                $cfg_smtp->setFrom($from->email, $from->name);
+                $cfg_smtp->setFrom($from['email'], $from['name']);
         
             // missing recipient
             if ($tos == null)
@@ -91,19 +91,19 @@ class Email
                     {
                         if (is_string($to))
                             $cfg_smtp->addAddress($to);
-                        else if (!property_exists($to, 'name'))
-                            $cfg_smtp->addAddress($to->email);
+                        else if (!array_key_exists('name', $to))
+                            $cfg_smtp->addAddress($to['email']);
                         else
-                            $cfg_smtp->addAddress($to->email, $to->name);
+                            $cfg_smtp->addAddress($to['email'], $to['name']);
                     }
                 }
                 else if (is_string($tos))
                     $cfg_smtp->addAddress($tos);
-                else if (!property_exists($tos, 'name'))
-                    $cfg_smtp->addAddress($tos->email);
-                else
-                    $cfg_smtp->addAddress($tos->email, $tos->name);
-            }
+                else if (!array_key_exists('name', $tos))
+					$cfg_smtp->addAddress($tos['email']);
+				else
+					$cfg_smtp->addAddress($tos['email'], $tos['name']);
+			}
 
             // adding Carbon Copy
             if ($ccs != null)
@@ -114,19 +114,19 @@ class Email
                     {
                         if (is_string($cc))
                             $cfg_smtp->addCC($cc);
-                        else if (!property_exists($cc, 'name'))
-                            $cfg_smtp->addCC($cc->email);
-                        else
-                            $cfg_smtp->addCC($cc->email, $cc->name);
-                    }
+						else if (!array_key_exists('name', $cc))
+							$cfg_smtp->addCC($cc['email']);
+						else
+							$cfg_smtp->addCC($cc['email'], $cc['name']);
+					}
                 }
                 else if (is_string($ccs))
                     $cfg_smtp->addCC($ccs);
-                else if (!property_exists($ccs, 'name'))
-                    $cfg_smtp->addCC($ccs->email);
-                else
-                    $cfg_smtp->addCC($ccs->email, $ccs->name);
-            }
+                else if (!array_key_exists('name', $ccs))
+					$cfg_smtp->addCC($ccs['email']);
+				else
+					$cfg_smtp->addCC($ccs['email'], $ccs['name']);
+			}
 
             // adding Blind Carbon Copy
             if ($bccs != null)
@@ -137,18 +137,18 @@ class Email
                     {
                         if (is_string($bcc))
                             $cfg_smtp->addBCC($bcc);
-                        else if (!property_exists($bcc, 'name'))
-                            $cfg_smtp->addBCC($bcc->email);
+                        else if (!array_key_exists('name', $bcc))
+                            $cfg_smtp->addBCC($bcc['email']);
                         else
-                            $cfg_smtp->addBCC($bcc->email, $bcc->name);
+                            $cfg_smtp->addBCC($bcc['email'], $bcc['name']);
                     }
                 }
                 else if (is_string($bccs))
                     $cfg_smtp->addBCC($bccs);
-                else if (!property_exists($bccs, 'name'))
-                    $cfg_smtp->addBCC($bccs->email);
+                else if (!array_key_exists('name', $bccs))
+                    $cfg_smtp->addBCC($bccs['email']);
                 else
-                    $cfg_smtp->addBCC($bccs->email, $bccs->name);
+                    $cfg_smtp->addBCC($bccs['email'], $bccs['name']);
             }
 
             $cfg_smtp->isHTML(true);
@@ -298,7 +298,7 @@ class Email
 	{
 		global $config, $db;
 		$sesUser = Session::User();
-		$recipientsCode = (int)$array["recipientsCode"];
+		$recipientsCode = (int)$array["recipients_code"];
 		$subject = $array["subject"];
 		$message = $array["message"];
 
