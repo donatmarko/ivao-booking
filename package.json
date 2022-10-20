@@ -12,7 +12,7 @@
     "leaflet-arc": "^1.0.2",
     "moment": "^2.22.2",
     "popper.js": "^1.14.4",
-    "sweetalert2": "^7.28.5",
+    "sweetalert2": "^11.6.0",
     "tempusdominus-bootstrap-4": "^5.1.2"
   },
   "devDependencies": {},
