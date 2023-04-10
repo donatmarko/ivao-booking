@@ -103,6 +103,9 @@ switch ($page)
 	case "logout":
 		Session::IVAOLogout();
 		break;
+    case "auth/callback":
+        Session::OAuth2Callback();
+        break;
 	default:
 		Pages::Add($page);
 		if (Session::LoggedIn() && empty(Session::User()->email) && empty($page))
