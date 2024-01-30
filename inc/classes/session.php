@@ -51,8 +51,22 @@ class Session
 			redirect("/");
 		}
 		else
-			redirect("login_ivao.php?url=" . $config["url"]);
+			redirect("newlogin_ivao.php?url=" . $config["url"]);
 	}
+
+	/**
+	 * Function is called by /auth/callback
+	 * This fuction will received call back from IVAO Oauth2 then redirect the code and state to the new login page
+	 * Redirect to the newlogin_ivao.php file
+	 */
+    public static function OAuth2Callback()
+	{
+        if (isset($_GET['code']) && isset($_GET['state'])) {
+            redirect('Location: newlogin_ivao.php?code='. $_GET['code'] . '&state=' . $_GET['state']);
+        } else {
+            redirect('Location: newlogin_ivao.php');
+        }
+    }
 	
 	/**
 	 * Function redirects to the specified page if we are not already there, and we're not on login and logout pages
