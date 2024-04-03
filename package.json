@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "description": "New booking system for IVAO Real Flight Event or similar events by Donat Marko",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.5.2",
     "bootstrap": "^4.1.3",
     "ckeditor": "^4.10.1",
     "datatables.net-bs4": "^1.10.23",
