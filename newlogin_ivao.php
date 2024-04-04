@@ -120,20 +120,24 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         header('Location: ' . $redirect_uri); // Try to login again
     }
 
-    $_SESSION["LOGIN"]->firstname = $user_res_data['firstName'];
-    $_SESSION["LOGIN"]->lastname = $user_res_data['lastName'];
-    $_SESSION["LOGIN"]->vid = $user_res_data['id'];
-    $_SESSION["LOGIN"]->ratingatc = $user_res_data['rating']['atcRating']['id'];
-    $_SESSION["LOGIN"]->ratingpilot = $user_res_data['rating']['pilotRating']['id'];
-    $_SESSION["LOGIN"]->division = $user_res_data['divisionId'];
-    $_SESSION["LOGIN"]->country = $user_res_data['countryId'];
-    $_SESSION["LOGIN"]->skype = "";
     $staffPosition = '';
     foreach ($user_res_data['userStaffPositions'] as $key => $value) {
         if ($key > 0) $staffPosition .= ':';
         $staffPosition .= $value['id'];
     }
-    $_SESSION["LOGIN"]->staff = $staffPosition;
+
+    $_SESSION["LOGIN"] = (object)[
+        'firstname' => $user_res_data['firstName'],
+        'lastname' => $user_res_data['lastName'],
+        'vid' => $user_res_data['id'],
+        'ratingatc' => $user_res_data['rating']['atcRating']['id'],
+        'ratingpilot' => $user_res_data['rating']['pilotRating']['id'],
+        'division' => $user_res_data['divisionId'],
+        'country' => $user_res_data['countryId'],
+        'skype' => '',
+        'staff' => $staffPosition,
+        'email' => '',
+    ];
     header('Location: ' . $_GET["url"] . '/login');
 } else {
     // First visit : Unauthenticated user
