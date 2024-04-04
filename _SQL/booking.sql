@@ -16,12 +16,12 @@ CREATE TABLE `airports` (
   `enabled` tinyint(1) NOT NULL,
   `charts` varchar(50) NOT NULL,
   `order` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE `config` (
   `key` varchar(30) NOT NULL,
   `value` varchar(50) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 INSERT INTO `config` (`key`, `value`) VALUES
 ('mode', '0'),
@@ -52,7 +52,7 @@ CREATE TABLE `flights` (
   `booked_by` int(11) NOT NULL,
   `booked_at` datetime NOT NULL,
   `token` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE `slots` (
   `id` int(11) NOT NULL,
@@ -68,14 +68,14 @@ CREATE TABLE `slots` (
   `booked` int(11) NOT NULL COMMENT '0-???, 1-requested, 2-confirmed',
   `booked_by` int(11) NOT NULL,
   `booked_at` datetime NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE `timeframes` (
   `id` int(11) NOT NULL,
   `airport_icao` varchar(4) NOT NULL,
   `time` datetime NOT NULL,
   `count` int(11) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
@@ -84,7 +84,7 @@ CREATE TABLE `users` (
   `lastname` varchar(30) NOT NULL,
   `rating_atc` varchar(3) NOT NULL,
   `rating_pilot` varchar(3) NOT NULL,
-  `email` text NOT NULL,
+  `email` text NOT NULL DEFAULT '',
   `privacy` tinyint(1) NOT NULL,
   `division` varchar(2) NOT NULL,
   `country` varchar(2) NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE `users` (
   `staff` text NOT NULL,
   `permission` int(11) NOT NULL,
   `last_login` datetime NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+);
 
 
 ALTER TABLE `airports`
