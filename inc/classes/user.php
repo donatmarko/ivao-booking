@@ -161,15 +161,15 @@ class User
 	public function getDivisionBadge($size = 32)
 	{
 		$div = $this->division;
-		if ($div == "XA") $div = "US";
+		// if ($div == "XA") $div = "US";
 		if ($div == "XB") $div = "BE";
-		if ($div == "XG") $div = "AE";
-		if ($div == "XM") $div = "JO";
-		if ($div == "XN") $div = "DK";
-		if ($div == "XO") $div = "AU";
-		if ($div == "XR") $div = "RU";
-		if ($div == "XU") $div = "GB";
-		if ($div == "XZ") $div = "ZA";
+		// if ($div == "XG") $div = "AE";
+		// if ($div == "XM") $div = "JO";
+		// if ($div == "XN") $div = "DK";
+		// if ($div == "XO") $div = "AU";
+		// if ($div == "XR") $div = "RU";
+		// if ($div == "XU") $div = "GB";
+		// if ($div == "XZ") $div = "ZA";
 
 		$imgUrl = "img/flags/$size/$div.png";
 
