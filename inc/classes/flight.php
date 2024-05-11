@@ -94,10 +94,10 @@ class Flight
 			if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
 				return 1;
 
-			$depTime = $array["departure_estimated"] == "true" ? "null" : $array["departure_time"];
-			$arrTime = $array["arrival_estimated"] == "true" ? "null" : $array["arrival_time"];
+			$depTime = $array["departure_estimated"] == "true" ? "null" : sprintf("'%s'", $array["departure_time"]);
+			$arrTime = $array["arrival_estimated"] == "true" ? "null" : sprintf("'%s'", $array["arrival_time"]);
 
-			if ($db->GetSQL()->query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES ('" . $array["flight_number"] . "', '" . $array["callsign"] . "', '" . $array["origin_icao"] . "', '" . $array["destination_icao"] . "', '" . $depTime . "', '" . $arrTime . "', '" . $array["aircraft_icao"] . "', " . $array["aircraft_freighter"] . ", '" . $array["terminal"] . "', '" . $array["gate"] . "', '" . $array["route"] . "', " . $array["booked"] . ", " . $array["booked_by"] . ", NOW())"))
+			if ($db->GetSQL()->query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES ('" . $array["flight_number"] . "', '" . $array["callsign"] . "', '" . $array["origin_icao"] . "', '" . $array["destination_icao"] . "', " . $depTime . ", " . $arrTime . ", '" . $array["aircraft_icao"] . "', " . $array["aircraft_freighter"] . ", '" . $array["terminal"] . "', '" . $array["gate"] . "', '" . $array["route"] . "', " . $array["booked"] . ", " . $array["booked_by"] . ", NOW())"))
 				return 0;
 		}
 		else

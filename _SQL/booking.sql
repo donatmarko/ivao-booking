@@ -14,7 +14,7 @@ CREATE TABLE `airports` (
   `icao` varchar(4) NOT NULL,
   `name` varchar(50) NOT NULL,
   `enabled` tinyint(1) NOT NULL,
-  `charts` varchar(50) NOT NULL,
+  `charts` varchar(50) NULL,
   `order` int(11) NOT NULL
 );
 
@@ -41,17 +41,17 @@ CREATE TABLE `flights` (
   `callsign` varchar(10) NOT NULL,
   `origin_icao` varchar(4) NOT NULL,
   `destination_icao` varchar(4) NOT NULL,
-  `departure_time` datetime NOT NULL,
-  `arrival_time` datetime NOT NULL,
+  `departure_time` datetime NULL,
+  `arrival_time` datetime NULL,
   `aircraft_icao` varchar(4) NOT NULL,
   `aircraft_freighter` tinyint(1) NOT NULL,
   `terminal` varchar(10) NOT NULL,
   `gate` varchar(10) NOT NULL,
   `route` text NOT NULL,
   `booked` int(11) NOT NULL COMMENT '0-free, 1-prebooked, 2-booked',
-  `booked_by` int(11) NOT NULL,
-  `booked_at` datetime NOT NULL,
-  `token` text NOT NULL
+  `booked_by` int(11) NULL,
+  `booked_at` datetime NULL,
+  `token` text NULL
 );
 
 CREATE TABLE `slots` (
