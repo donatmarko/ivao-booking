@@ -12,9 +12,9 @@ if ($openid_result === FALSE) {
 $openid_data = json_decode($openid_result, true);
 
 // Now we can take care of the actual authentication
-$client_id = 'REQ from DevHQ';
-$client_secret = 'REQ from DevHQ';
-$redirect_uri = 'http://rfe.th.ivao.aero/auth/callback';
+$client_id = 'c1180449-53ac-489a-8471-d66ce7ae0c08';
+$client_secret = 'S8yepvpBYrtoDkb0ZdehZpvAQU4XcyMC';
+$redirect_uri = 'https://test.donatus.hu/auth/callback';
 
 if (isset($_GET['code']) && isset($_GET['state'])) {
     // User has been redirected back from the login page
@@ -135,7 +135,6 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         'division' => $user_res_data['divisionId'],
         'country' => $user_res_data['countryId'],
         'staff' => $staffPosition,
-        'email' => '',
     ];
     header('Location: ' . $_GET["url"] . '/login');
 } else {
