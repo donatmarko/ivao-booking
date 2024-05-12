@@ -517,7 +517,7 @@ class Flight
 			{
 				$u = User::Find($this->bookedBy);
 				$email = $this->EmailReplaceVars(file_get_contents("contents/flight_booking.html"));
-				if (Email::Prepare($email, $u->firstname . " " . $u->lastname, $u->email, "Flight booking confirmation"))
+				if (Email::Prepare($email, $u->getFullname(), $u->email, "Flight booking confirmation"))
 					return 0;
 			}
 			else

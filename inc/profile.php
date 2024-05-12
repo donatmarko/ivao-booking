@@ -13,7 +13,7 @@
 	
 	<?php
 	$u = Session::User();
-	$fullname = $u->firstname . " " . $u->lastname;
+	$fullname = $u->getFullname();
 	?>
 	
 	<form id="frmProfile">

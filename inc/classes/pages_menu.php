@@ -239,9 +239,8 @@ class Menu
 		// if we are logged in, adding an user menu at the end of the menu bar
 		if (Session::LoggedIn())
 		{
-			$name = $_SESSION["LOGIN"]->firstname . " " . $_SESSION["LOGIN"]->lastname;
 			echo '<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle' . ($page === "profile" || $page === "mybookings" ? ' active' : '') . '" href="#" role="button" data-toggle="dropdown">' . $name . '</a>
+				<a class="nav-link dropdown-toggle' . ($page === "profile" || $page === "mybookings" ? ' active' : '') . '" href="#" role="button" data-toggle="dropdown">' . Session::User()->getFullname() . '</a>
 				<div class="dropdown-menu">
 					<a class="dropdown-item' . ($page === "mybookings" ? ' active' : '') . '" href="mybookings">My booked flights</a>
 					<a class="dropdown-item' . ($page === "profile" ? ' active' : '') . '" href="profile">Profile</a>

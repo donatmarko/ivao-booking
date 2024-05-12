@@ -279,13 +279,13 @@ function getSlot(id)
 
 			if (data.booked == "requested")
 			{
-				$("#slotInfobox").html("This slot has not yet been granted to the requester.")
+				$("#slotInfobox").html("This slot has not yet been granted.")
 					.attr("class", "alert alert-warning")
 				$("#lblBookedByName").html("Slot has been requested by");
 			}
 			if (data.booked == "granted")
 			{
-				$("#slotInfobox").html("This slot has been granted to the requester.")
+				$("#slotInfobox").html("This slot has been accepted.")
 					.attr("class", "alert alert-danger")
 				$("#lblBookedByName").html("Slot has been granted to");
 			}

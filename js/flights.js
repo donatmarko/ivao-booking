@@ -167,7 +167,7 @@ function getFlight(id)
 			$("#fltBtnsConfirm").hide();
 			if (data.booked == "free")
 			{
-				$("#fltInfobox").html("This flight is available for booking!")
+				$("#fltInfobox").html("This flight is available for booking.")
 					.attr("class", "alert alert-success");
 				$("#fltBookedBy").hide();
 				$("#btnFltBook").show();					

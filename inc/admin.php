@@ -9,7 +9,7 @@
 
 global $config;
 $sesUser = Session::User();
-$fullname = $sesUser->firstname . " " . $sesUser->lastname;
+$fullname = $sesUser->getFullname();
 
 // determining count of booking confirmation emails
 $flts = Flight::GetAll();

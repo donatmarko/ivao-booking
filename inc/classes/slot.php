@@ -108,7 +108,7 @@ class Slot
 					$slot = Slot::Find($db->GetInsertID());
 					$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
 
-					if (Email::Prepare($email, $u->firstname . " " . $u->lastname, $u->email, "Private slot request"))
+					if (Email::Prepare($email, $u->getFullname(), $u->email, "Private slot request"))
 						return 0;
 				}
 				else
@@ -401,7 +401,7 @@ class Slot
 				if ($user && !empty($user->email))
 				{
 					$email = $this->EmailReplaceVars(file_get_contents("contents/slot_accepted.html"));
-					Email::Prepare($email, $user->firstname . " " . $user->lastname, $user->email, "Your slot has been accepted");
+					Email::Prepare($email, $user->getFullname(), $user->email, "Your slot has been accepted");
 				}
 			}
 			else if ($array["booked"] == 0)
@@ -418,7 +418,7 @@ class Slot
 
 					$email = $this->EmailReplaceVars(file_get_contents("contents/slot_rejected.html"));
 					$email = str_replace("%slot_rejectMessage%", $rejectMessage, $email);
-					Email::Prepare($email, $user->firstname . " " . $user->lastname, $user->email, "Your slot has been rejected");
+					Email::Prepare($email, $user->getFullname(), $user->email, "Your slot has been rejected");
 				}
 				$toBeDeleted = true;
 			}
@@ -436,7 +436,7 @@ class Slot
 					if ($user && !empty($user->email))
 					{
 						$email = $this->EmailReplaceVars(file_get_contents("contents/slot_modified.html"));
-						Email::Prepare($email, $user->firstname . " " . $user->lastname, $user->email, "Your slot has been modified");
+						Email::Prepare($email, $user->getFullname(), $user->email, "Your slot has been modified");
 					}
 				}
 			}

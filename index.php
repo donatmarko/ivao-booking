@@ -79,7 +79,7 @@ Menu::addItems([
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="author" content="Donat Marko">
+	<meta name="author" content="Donat Marko (IVAO VID 540147)">
 	<meta name="xsrf-token" content="<?=$_SESSION["xsrfToken"]; ?>">
 	<title><?=$config["event_name"]; ?> Booking System | <?=$config["division_name"]; ?></title>
 	<link rel="stylesheet" href="css/bootstrap.min.css">
@@ -160,6 +160,8 @@ echo Pages::Get();
 <script src="node_modules/ckeditor/ckeditor.js"></script>
 <script src="https://unpkg.com/leaflet-arc/bin/leaflet-arc.min.js"></script>
 <?=Pages::GetJS(); ?>
+
+<!-- Total Execution Time: <?=(microtime(true) - $start_time) * 1000; ?> ms -->
 
 </body>
 
