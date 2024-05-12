@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -20,7 +20,7 @@ class Airline
 	public static function Find($icao)
 	{
 		global $dbNav;
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM airlines WHERE icao='" . $icao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM airlines WHERE icao = §", $icao))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Airline($row);
@@ -42,8 +42,10 @@ class Airline
 	 */
 	public function getLogo()
 	{
-		$imgUrl = "img/airlines/" . $this->icao . ".gif";
-		return file_exists($imgUrl) ? '<img src="' . $imgUrl . '" alt="' . $this->icao . '" class="img-fluid"> ' : "";
+		$imgUrl = sprintf("img/airlines/%s.gif", $this->icao);
+		if (file_exists($imgUrl))
+			return sprintf('<img src="%s" alt="%s" class="img-fluid"> ', $imgUrl, $this->icao);
+		return "";
 	}
 	
 	/**
@@ -52,8 +54,10 @@ class Airline
 	 */
 	public function getLogoSmall()
 	{
-		$imgUrl = "img/airlines/" . $this->icao . ".gif";
-		return file_exists($imgUrl) ? '<img src="' . $imgUrl . '" alt="' . $this->icao . '" class="img-fluid" style="width: 40%"> ' : "";
+		$imgUrl = sprintf("img/airlines/%s.gif", $this->icao);
+		if (file_exists($imgUrl))
+			return sprintf('<img src="%s" alt="%s" class="img-fluid" style="width: 40%%"> ', $imgUrl, $this->icao);
+		return "";
 	}
 	
 	/**

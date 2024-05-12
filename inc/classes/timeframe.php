@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -35,7 +35,7 @@ class Timeframe
 	public static function Find($id)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM timeframes WHERE id=" . $id))
+		if ($query = $db->Query("SELECT * FROM timeframes WHERE id = §", $id))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Timeframe($row);
@@ -48,7 +48,7 @@ class Timeframe
 		global $db;
 		$timeframes = [];
 
-		if ($query = $db->GetSQL()->query("SELECT * FROM timeframes ORDER BY airport_icao, time"))
+		if ($query = $db->Query("SELECT * FROM timeframes ORDER BY airport_icao, time"))
 		{
 			while ($row = $query->fetch_assoc())
 				$timeframes[] = new Timeframe($row);
@@ -66,24 +66,20 @@ class Timeframe
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			$sqls = [];
+			$ok = true;
 			for ($i = $array["hour_from"]; $i <= $array["hour_to"]; $i++)
 			{
-				$datetime = $array["date"] . " " . $i . ":" . $array["minute"] . ":00";
-				$sqls[] = "INSERT INTO timeframes (airport_icao, `time`, `count`) VALUES ('" . $array["airport_icao"] . "', '" . $datetime . "', " . $array["count"] . ")";
-			}
-
-			$ok = true;
-			foreach ($sqls as $sql)
-			{
-				if (!$db->GetSQL()->query($sql))
+				$datetime = sprintf("%s %s:%s:00", $array["date"], $i, $array["minute"]);
+				if (!$db->Query("INSERT INTO timeframes (airport_icao, `time`, `count`) VALUES (§, §, §)", $array["airport_icao"], $datetime, $array["count"]))
 					$ok = false;
 			}
+
 			if ($ok)
 				return 0;
 		}
 		else
 			return 403;
+
 		return -1;
 	}
 
@@ -108,7 +104,7 @@ class Timeframe
 			foreach ($this->getSlots() as $sb)
 				$sb->Delete();
 
-			if ($db->GetSQL()->query("DELETE FROM timeframes WHERE id=" . $this->id))
+			if ($db->Query("DELETE FROM timeframes WHERE id = §", $this->id))
 				return 0;
 		}
 		else
@@ -126,7 +122,7 @@ class Timeframe
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("UPDATE timeframes SET `time`='" . $array["time"] . "', `count`=" . $array["count"] . " WHERE id=" . $this->id))
+			if ($db->Query("UPDATE timeframes SET `time` = §, `count` = § WHERE id = §", $array["time"], $array["count"], $this->id))
 				return 0;
 		}
 		else
@@ -192,7 +188,7 @@ class Timeframe
 		global $db;
 		$ss = [];
 
-		if ($query = $db->GetSQL()->query("SELECT * FROM slots WHERE timeframe_id=" . $this->id . " ORDER BY booked, booked_at"))
+		if ($query = $db->Query("SELECT * FROM slots WHERE timeframe_id = § ORDER BY booked, booked_at", $this->id))
 		{
 			while ($row = $query->fetch_assoc())
 				$ss[] = new Slot($row);
@@ -206,7 +202,6 @@ class Timeframe
 	 */
 	public function getStatistics()
 	{ 
-		global $db;
 		$stat = [
 			"free" => $this->count,
 			"requested" => 0,

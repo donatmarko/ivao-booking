@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -20,7 +20,7 @@ class Airport
 	public static function Find($icao)
 	{
 		global $dbNav;
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM airports WHERE icao='" . $icao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM airports WHERE icao = §", $icao))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Airport($row);
@@ -54,12 +54,12 @@ class Airport
 	 */
 	public function getCountryFlag($size = 32)
 	{
-		$imgUrl = "img/flags/$size/" . $this->country . ".png";
+		$imgUrl = sprintf("img/flags/%s/%s.png", $size, $this->country);
 
 		if (!file_exists($imgUrl))
-			$imgUrl = "img/flags/$size/_unknown.png";
+			$imgUrl = sprintf("img/flags/%s/_unknown.png", $size);
 			
-		return '<img src="' . $imgUrl . '" alt="' . $this->country . '" data-toggle="tooltip" title="Country: ' . $this->country . '" class="img-fluid"> ';
+		return sprintf('<img src="%s" alt="%s" data-toggle="tooltip" title="Country: %s" class="img-fluid"> ', $imgUrl, $this->country, $this->country);
 	}
 
 	/**
@@ -70,7 +70,7 @@ class Airport
 	public function getMetar()
 	{
 		global $config;
-		return file_get_contents($config["wx_url"] . "?type=metar&icao=" . $this->icao);
+		return file_get_contents(sprintf('%s?type=metar&icao=%s', $config["wx_url"], $this->icao));
 	}
 
 	/**
@@ -81,7 +81,7 @@ class Airport
 	public function getTaf()
 	{
 		global $config;
-		return file_get_contents($config["wx_url"] . "?type=taf&icao=" . $this->icao);
+		return file_get_contents(sprintf('%s?type=taf&icao=%s', $config["wx_url"], $this->icao));
 	}
 	
 	/**

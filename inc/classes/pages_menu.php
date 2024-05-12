@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -69,7 +69,7 @@ class Content
 		$this->name = $name;
 		$this->title = $title;
 		$this->type = $type;
-		$filename = "contents/$name.html";
+		$filename = sprintf("contents/%s.html", $name);
 
 		if (file_exists($filename))
 			$this->body = file_get_contents($filename);
@@ -101,7 +101,7 @@ class Content
 	{
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			$filename = "contents/" . $this->name . ".html";
+			$filename = sprintf("contents/%s.html", $this->name);
 
 			if (file_exists($filename))
 			{
@@ -126,8 +126,10 @@ class Pages
 		if (empty($href))
 			$href = "banner";
 
-		if (!empty($href) && file_exists("inc/" . $href . ".php"))
-			Pages::$pages[] = "inc/" . $href . ".php";
+		$filename = sprintf("inc/%s.php", $href);
+
+		if (!empty($href) && file_exists($filename))
+			Pages::$pages[] = $filename;
 		else
 			Pages::$pages[] = "inc/404.php";
 
@@ -139,8 +141,10 @@ class Pages
 		if (empty($href))
 			$href = "banner";
 
-		if (file_exists("js/" . $href . ".js"))
-			Pages::$scripts[] = "js/" . $href . ".js";
+		$filename = sprintf("js/%s.js", $href);
+
+		if (file_exists($filename))
+			Pages::$scripts[] = $filename;
 	}
 
 	public static function AddJSinline($js)
@@ -158,10 +162,10 @@ class Pages
 	{
 		$result = "";
 		foreach (Pages::$scripts as $s)
-			$result .= '<script src="' . $s .'"></script>';
+			$result .= sprintf('<script src="%s"></script>', $s);
 
 		if (!empty(Pages::$js))
-			$result .= '<script>' . Pages::$js . '</script>';
+			$result .= sprintf('<script>%s</script>', Pages::$js);
 			
 		return $result;
 	}

@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -64,20 +64,20 @@ function getSlots($flights)
 	<h1>My booked flights</h1>
 	
 	<div class="card mb-4">
-		<h5 class="card-header">Scheduled flights (<?=count($flights)?>)</h5>
+		<h5 class="card-header">Scheduled flights (<?=count($flights); ?>)</h5>
 		<div class="card-body">
 			<div class="list-group">
-				<?=getFlights($flights)?>
+				<?=getFlights($flights); ?>
 			</div>
 		</div>
 	</div>
 
 <?php if (count(Timeframe::GetAll()) > 0) : ?>
 	<div class="card mb-4">
-		<h5 class="card-header">Private slots (<?=count($slots)?>)</h5>
+		<h5 class="card-header">Private slots (<?=count($slots); ?>)</h5>
 		<div class="card-body">		
 			<div class="list-group">
-				<?=getSlots($slots)?>
+				<?=getSlots($slots); ?>
 			</div>
 		</div>
 	</div>

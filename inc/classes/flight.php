@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -21,7 +21,7 @@ class Flight
 	public static function Find($id)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights WHERE id=" . $id))
+		if ($query = $db->Query("SELECT * FROM flights WHERE id = §", $id))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Flight($row);
@@ -38,7 +38,7 @@ class Flight
 	public static function FindToken($token)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights WHERE token='" . $token . "'"))
+		if ($query = $db->Query("SELECT * FROM flights WHERE token = §", $token))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Flight($row);
@@ -55,7 +55,7 @@ class Flight
 		global $db;
 		$flts = [];
 
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights ORDER BY departure_time, flight_number"))
+		if ($query = $db->Query("SELECT * FROM flights ORDER BY departure_time, flight_number"))
 		{
 			while ($row = $query->fetch_assoc())
 				$flts[] = new Flight($row);
@@ -94,14 +94,32 @@ class Flight
 			if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
 				return 1;
 
-			$depTime = $array["departure_estimated"] == "true" ? "null" : sprintf("'%s'", $array["departure_time"]);
-			$arrTime = $array["arrival_estimated"] == "true" ? "null" : sprintf("'%s'", $array["arrival_time"]);
-
-			if ($db->GetSQL()->query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES ('" . $array["flight_number"] . "', '" . $array["callsign"] . "', '" . $array["origin_icao"] . "', '" . $array["destination_icao"] . "', " . $depTime . ", " . $arrTime . ", '" . $array["aircraft_icao"] . "', " . $array["aircraft_freighter"] . ", '" . $array["terminal"] . "', '" . $array["gate"] . "', '" . $array["route"] . "', " . $array["booked"] . ", " . $array["booked_by"] . ", NOW())"))
+			$depTime = $array["departure_estimated"] == "true" ? null : $array["departure_time"];
+			$arrTime = $array["arrival_estimated"] == "true" ? null : $array["arrival_time"];
+			$aircraft_freighter = $array["aircraft_freighter"] == "true";
+	
+			if ($db->Query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, §, §, NOW())",
+				$array["flight_number"],
+				$array["callsign"],
+				$array["origin_icao"],
+				$array["destination_icao"],
+				$depTime,
+				$arrTime,
+				$array["aircraft_icao"],
+				$aircraft_freighter,
+				$array["terminal"],
+				$array["gate"],
+				$array["route"],
+				$array["booked"],
+				$array["booked_by"]
+			))
+			{
 				return 0;
+			}
 		}
 		else
 			return 403;
+
 		return -1;
 	}
 
@@ -183,23 +201,7 @@ class Flight
 	 */
 	public static function isCommercialCallsign($callsign)
 	{
-		if (strlen($callsign) > 3)
-		{
-			$ok = true;
-			for ($i = 0; $i < 3; $i++)
-			{
-				// if the first 3 characters are letters or not
-				if (!preg_match("/^[a-zA-Z]+$/", $callsign[$i]))
-					$ok = false;
-				
-				// if the 4th digit is number or not
-				if (!is_numeric($callsign[3]))
-					$ok = false;
-			}
-			if ($ok)
-				return true;
-		}
-		return false;
+		return preg_match("/^([A-Z]{3})(\d\w{0,3})$/", $callsign);
 	}
 
 	/**
@@ -323,7 +325,7 @@ class Flight
 		$gcd = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
 		$speed = 250;
 
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM aircrafts where icao='" . $this->aircraftIcao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
 		{
 			if ($row = $query->fetch_assoc())
 			{
@@ -436,14 +438,13 @@ class Flight
 	public function getAircraftName()
 	{
 		global $dbNav;
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM aircrafts WHERE icao='" . $this->aircraftIcao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
 		{
 			if ($row = $query->fetch_assoc())
 			{
 				if ($this->aircraftFreighter)
-					return $row["name"] . " (freighter)";
-				else
-					return $row["name"];
+					return sprintf("%s (freighter)", $row["name"]);
+				return $row["name"];
 			}
 		}
 		return "";
@@ -565,11 +566,10 @@ class Flight
 				else
 				{
 					$token = md5(uniqid($u->vid . date("Y-m-d H:i:s")));
-					$query = "UPDATE flights SET booked=1, booked_by=" . $u->vid .", booked_at=now(), token='" . $token . "' WHERE id=" . $this->id;
 					$this->token = $token;
 					$this->bookedBy = $u->vid;
 
-					if ($db->GetSQL()->query($query))
+					if ($db->Query("UPDATE flights SET booked = 1, booked_by = §, booked_at = NOW(), token = § WHERE id = §", $u->vid, $token, $this->id))
 					{					
 						if (!empty($u->email))
 						{
@@ -602,8 +602,7 @@ class Flight
 		{	
 			if ($this->booked == "prebooked")
 			{
-				$query = "UPDATE flights SET booked=2, token='' WHERE id=" . $this->id;
-				if ($db->GetSQL()->query($query))
+				if ($db->Query("UPDATE flights SET booked = 2, token = '' WHERE id = §", $this->id))
 					return 0;
 			}
 			else
@@ -611,6 +610,7 @@ class Flight
 		}
 		else
 			return 403;
+
 		return -1;
 	}
 
@@ -629,8 +629,7 @@ class Flight
 			// only allow freeing if we are admins or the previous booker
 			if ($u->permission >= 2 || $u->vid == $this->bookedBy)
 			{			
-				$query = "UPDATE flights SET booked=0, booked_by=0, booked_at=now(), token='' WHERE id=" . $this->id;
-				if ($db->GetSQL()->query($query))
+				if ($db->Query("UPDATE flights SET booked = 0, booked_by = 0, booked_at = NOW(), token = '' WHERE id = §", $this->id))
 					return 0;
 			}
 			else
@@ -650,7 +649,7 @@ class Flight
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("DELETE FROM flights WHERE id=" . $this->id))
+			if ($db->Query("DELETE FROM flights WHERE id = §", $this->id))
 				return 0;
 		}
 		else
@@ -672,19 +671,58 @@ class Flight
 			if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
 				return 1;
 
-			$depTime = $array["departure_estimated"] == "true" ? "null" : $array["departure_time"];
-			$arrTime = $array["arrival_estimated"] == "true" ? "null" : $array["arrival_time"];
+			$depTime = $array["departure_estimated"] == "true" ? null : $array["departure_time"];
+			$arrTime = $array["arrival_estimated"] == "true" ? null : $array["arrival_time"];
+			$aircraft_freighter = $array["aircraft_freighter"] == "true";
 
-			if ($array["booked_by"] == $this->bookedBy)
-				$sql = "UPDATE flights SET flight_number='" . $array["flight_number"] . "', callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', departure_time='" . $depTime . "', arrival_time='" . $arrTime . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . " WHERE id=" . $array["id"];
+			if ($array["booked"] == $this->booked)
+			{
+				if ($db->Query("UPDATE flights SET flight_number = §, callsign = §, origin_icao = §, destination_icao = §, departure_time = §, arrival_time = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = § WHERE id = §",
+					$array["flight_number"],
+					$array["callsign"],
+					$array["origin_icao"],
+					$array["destination_icao"], 
+					$depTime,
+					$arrTime,
+					$array["aircraft_icao"],
+					$aircraft_freighter,
+					$array["terminal"],
+					$array["gate"],
+					$array["route"],
+					$this->id
+				))
+				{
+					return 0;
+				}
+			}
 			else
-				$sql = "UPDATE flights SET flight_number='" . $array["flight_number"] . "', callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', departure_time='" . $depTime . "', arrival_time='" . $arrTime . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . ", booked_by=" . $array["booked_by"] . ", booked_at=NOW() WHERE id=" . $array["id"];
+			{
+				if ($db->Query("UPDATE flights SET flight_number = §, callsign = §, origin_icao = §, destination_icao = §, departure_time = §, arrival_time = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = §, booked = §, booked_by = §, booked_at = NOW() WHERE id = §",
+					$array["flight_number"],
+					$array["callsign"],
+					$array["origin_icao"],
+					$array["destination_icao"], 
+					$depTime,
+					$arrTime,
+					$array["aircraft_icao"],
+					$aircraft_freighter,
+					$array["terminal"],
+					$array["gate"],
+					$array["route"],
+					$array["booked"],
+					$array["booked_by"],
+					$this->id
+				))
+				{
+					return 0;
+				}
+			}
 
-			if ($db->GetSQL()->query($sql))
-				return 0;
+			
 		}
 		else
 			return 403;
+		
 		return -1;
 	}
 

@@ -134,7 +134,6 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         'ratingpilot' => $user_res_data['rating']['pilotRating']['id'],
         'division' => $user_res_data['divisionId'],
         'country' => $user_res_data['countryId'],
-        'skype' => '',
         'staff' => $staffPosition,
         'email' => '',
     ];

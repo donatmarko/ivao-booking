@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -29,11 +29,11 @@
 				</tr>
 				<tr>
 					<th>Division</th>
-					<td><?=$u->getDivisionBadge()?></td>
+					<td><?=$u->getDivisionBadge(); ?></td>
 				</tr>
 				<tr>
 					<th>Ratings</th>
-					<td><?=$u->getAtcBadge() . " " . $u->getPilotBadge()?></td>
+					<td><?=$u->getAtcBadge() . " " . $u->getPilotBadge(); ?></td>
 				</tr>
 				<tr>
 					<th>E-mail address</th>
@@ -50,7 +50,7 @@
 				<tr>
 					<th>Privacy setting</th>
 					<td>
-						<input type="checkbox" class="form-check-input" id="chkPrivacy" <?=$u->privacy ? "checked" : ""?>>
+						<input type="checkbox" class="form-check-input" id="chkPrivacy" <?=$u->privacy ? "checked" : ""; ?>>
 						<label class="form-check-label" for="chkPrivacy">Show my full name to other pilots at my booked flights when they're logged in</label>
 					</td>
 				</tr>

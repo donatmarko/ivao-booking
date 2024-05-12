@@ -3,16 +3,12 @@ $('#flight').on('hidden.bs.modal', function (e) {
 		window.location.reload();
 });
 
-$("#selFltStatus").on("change", function()
-{
+$("#selFltStatus").on("change", function() {
 	var val = $("#selFltStatus").val();
-	if (val > 0)
-	{
+	if (val > 0) {
 		$("#numFltBookedBy").prop("disabled", false)
 			.prop("required", true);
-	}
-	else
-	{
+	} else {
 		$("#numFltBookedBy").val(null)
 			.prop("disabled", true)
 			.prop("required", false);
@@ -20,7 +16,12 @@ $("#selFltStatus").on("change", function()
 });
 
 $("#dtpFltDeparture").on("change.datetimepicker", function(e) {
-	$('#dtpFltArrival').datetimepicker('minDate', e.date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 }));
+	$('#dtpFltArrival').datetimepicker('minDate', e.date.set({ 
+		hour: 0, 
+		minute: 0, 
+		second: 0, 
+		millisecond: 0 
+	}));
 });
 
 $("#frmFlightNew").submit(function(e) {
@@ -28,102 +29,125 @@ $("#frmFlightNew").submit(function(e) {
 	e.stopImmediatePropagation();	
 	editFlight();	
 });
+
 $("#frmFlightEdit").submit(function(e) {
 	e.preventDefault();
 	e.stopImmediatePropagation();	
 	editFlight();	
 });
 
-function editFlight()
-{
-	var id = $("#fltId").val();
-	var fltno = $("#txtFltFlightNumber").val().toUpperCase();
-	var callsign = $("#txtFltCallsign").val().toUpperCase();
-	var origin = $("#txtFltOriginIcao").val().toUpperCase();
-	var destination = $("#txtFltDestinationIcao").val().toUpperCase();
-	var aircraft = $("#txtFltAircraftIcao").val().toUpperCase();
-	var isFreighter = $("#chkFltFreighter").is(":checked");
-	var terminal = $("#txtFltTerminal").val().toUpperCase();
-	var gate = $("#txtFltGate").val().toUpperCase();
-	var route = $("#txtFltRoute").val().toUpperCase();
-	var booked = $("#selFltStatus").val();
-	var bookedBy = Number($("#numFltBookedBy").val());
-	var departure = $("#dtpFltDeparture").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
-	var arrival = $("#dtpFltArrival").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
-	var depAuto = $("#chkFltDepartureAuto").is(":checked");
-	var arrAuto = $("#chkFltArrivalAuto").is(":checked");
+async function editFlight() {
+	const id = $("#fltId").val();
+	const flight_number = $("#txtFltFlightNumber").val().toUpperCase();
+	const callsign = $("#txtFltCallsign").val().toUpperCase();
+	const origin_icao = $("#txtFltOriginIcao").val().toUpperCase();
+	const destination_icao = $("#txtFltDestinationIcao").val().toUpperCase();
+	const aircraft_icao = $("#txtFltAircraftIcao").val().toUpperCase();
+	const aircraft_freighter = $("#chkFltFreighter").is(":checked");
+	const terminal = $("#txtFltTerminal").val().toUpperCase();
+	const gate = $("#txtFltGate").val().toUpperCase();
+	const route = $("#txtFltRoute").val().toUpperCase();
+	const booked = $("#selFltStatus").val();
+	const booked_by = Number($("#numFltBookedBy").val());
+	const departure_time = $("#dtpFltDeparture").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
+	const arrival_time = $("#dtpFltArrival").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
+	const departure_estimated = $("#chkFltDepartureAuto").is(":checked");
+	const arrival_estimated = $("#chkFltArrivalAuto").is(":checked");
 
-	if (depAuto && arrAuto)
-	{
+	if (departure_estimated && arrival_estimated) {
 		swal2({
 			title: "At least one slot time must be given!",
-			text: "It is not possible to be both times automatically estimated.",
+			text: "It is not possible for both times be automatically estimated.",
 			type: "error",
 			confirmButtonText: "OK",
 		});
 		return;
 	}
 
-	if (id == -1)
-	{
-		$.ajax({
-			cache: false,
-			type: "POST",
-			url: "json",
-			data: { "type": "flights", "action": "create", "flight_number": fltno, "callsign": callsign, "origin_icao": origin, "destination_icao": destination, "aircraft_icao": aircraft, "aircraft_freighter": isFreighter, "terminal": terminal, "gate": gate, "route": route, "booked": booked, "booked_by": bookedBy, "departure_time": departure, "arrival_time": arrival, "departure_estimated": depAuto, "arrival_estimated": arrAuto },
-			success: function(data) {
-				if (data && data.error == 0)
-				{
-					toast({
-						title: "The flight has been added!",
-						type: "success",
-					});
-					pageToBeReloaded = true;
-					aNewFlight();
-				}					
-				else if (data && data.error == 1)
-				{
-					swal2({
-						title: "The user doesn't exist!",
-						text: "Please check the supplied VID!",
-						type: "error",
-						confirmButtonText: "RIP",
-					});
-				}
-				else
-					notification(data);
-			}
-		});	
+	if (id == -1) {
+		const response = await $.post("json", {
+			"type": "flights", 
+			"action": "create", 
+			"flight_number": flight_number, 
+			"callsign": callsign, 
+			"origin_icao": origin_icao, 
+			"destination_icao": destination_icao, 
+			"aircraft_icao": aircraft_icao, 
+			"aircraft_freighter": aircraft_freighter, 
+			"terminal": terminal, 
+			"gate": gate, 
+			"route": route, 
+			"booked": booked, 
+			"booked_by": booked_by, 
+			"departure_time": departure_time, 
+			"arrival_time": arrival_time, 
+			"departure_estimated": departure_estimated,
+			"arrival_estimated": arrival_estimated
+		});
+
+		if (response?.error == 0)
+		{
+			toast({
+				title: "The flight has been added!",
+				type: "success",
+			});
+			pageToBeReloaded = true;
+			aNewFlight();
+		}
+		else if (response?.error == 1)
+		{
+			swal2({
+				title: "The user doesn't exist!",
+				text: "Please check the supplied VID!",
+				type: "error",
+				confirmButtonText: "RIP",
+			});
+		}
+		else
+			notification(data);
 	}
 	else
 	{
-		$.ajax({
-			cache: false,
-			type: "POST",
-			url: "json",
-			data: { "type": "flights", "action": "update", "id": id, "flight_number": fltno, "callsign": callsign, "origin_icao": origin, "destination_icao": destination, "aircraft_icao": aircraft, "aircraft_freighter": isFreighter, "terminal": terminal, "gate": gate, "route": route, "booked": booked, "booked_by": bookedBy, "departure_time": departure, "arrival_time": arrival, "departure_estimated": depAuto, "arrival_estimated": arrAuto },
-			success: function(data) {
-				if (data && data.error == 0)
-				{
-					toast({
-						title: "The flight has been modified!",
-						type: "success",
-					});
-					pageToBeReloaded = true;
-					getFlight(id);
-				}
-				else if (data && data.error == 1)
-				{
-					swal2({
-						title: "The user doesn't exist!",
-						text: "Please check the supplied VID!",
-						type: "error",
-						confirmButtonText: "RIP",
-					});
-				}
-				else
-					notification(data);
-			}
-		});	
+		const response = await $.post("json", {
+			type: "flights", 
+			action: "update", 
+			id: id, 
+			flight_number: flight_number, 
+			callsign: callsign, 
+			origin_icao: origin_icao, 
+			destination_icao: destination_icao, 
+			aircraft_icao: aircraft_icao, 
+			aircraft_freighter: aircraft_freighter, 
+			terminal: terminal, 
+			gate: gate, 
+			route: route, 
+			booked: booked, 
+			booked_by: booked_by, 
+			departure_time: departure_time, 
+			arrival_time: arrival_time, 
+			departure_estimated: departure_estimated, 
+			arrival_estimated: arrival_estimated
+		});
+
+		if (response?.error == 0)
+		{
+			toast({
+				title: "The flight has been modified!",
+				type: "success",
+			});
+			pageToBeReloaded = true;
+			getFlight(id);
+		}
+		else if (response?.error == 1)
+		{
+			swal2({
+				title: "The user doesn't exist!",
+				text: "Please check the supplied VID!",
+				type: "error",
+				confirmButtonText: "RIP",
+			});
+		}
+		else
+			notification(data);
 	}
 }
