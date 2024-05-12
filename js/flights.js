@@ -179,7 +179,7 @@ function getFlight(id)
 					$("#fltBtnsDefault").hide();
 					$("#fltBtnsConfirm").show();
 					$("#fltInfobox").attr("class", "alert alert-warning")
-						.html("<p>Please book <strong>only</strong> if you have real intentions to accomplish this flight!</p><p>Don't abuse the event with booking flights just to block them from other members! Thank you.</p>");
+						.html("<p>Please book <strong>only</strong> if you have real intentions to accomplish this flight!</p><div>Don't abuse the event with booking flights just to block them from other members! Thank you.</div>");
 					$("#btnFltConfirm").attr("onclick", "bookFlight(" + id + ")");
 				});
 			}

@@ -13,39 +13,6 @@
 class Email
 {
 	/**
-	 * Sends email through donatus' SMTP API. (https://github.com/donatmarko/my-smtp-api)
-	 * @param mixed $from - name, email
-	 * @param mixed $tos - name, email
-	 * @param mixed $ccs - name, email
-	 * @param mixed $bccs - name, email
-	 * @param string $subject
-	 * @param string $message
-	 * @return int error code (check API doc)
-	 */
-	public static function SendApi($from, $tos, $ccs, $bccs, $subject, $message)
-	{
-		global $config;
-
-		$mail = [
-			"from" => $from,
-			"to" => $tos,
-			"cc" => $ccs,
-			"bcc" => $bccs,
-			"subject" => $subject,
-			"body" => $message,
-			"charset" => "UTF-8",
-			"isHTML" => true
-		];
-		
-		$result = callApi("POST", $config["mail_api_url"], [
-			"apikey" => $config["mail_api_key"],
-			"mail" => json_encode($mail)
-		]);
-				
-		return json_decode($result)->error_code;
-	}
-
-	/**
 	 * Sends email through PHPMailer SMTP. (https://github.com/PHPMailer/PHPMailer)
 	 * @param mixed $from - name, email
 	 * @param mixed $tos - name, email
@@ -58,6 +25,9 @@ class Email
 	public static function SendSmtp($from, $tos, $ccs, $bccs, $subject, $message)
 	{
 		global $config;
+
+		if (!$config["mail_enabled"])
+			return 0;
 
 		$cfg_smtp = new PHPMailer\PHPMailer\PHPMailer(true);
 		try
@@ -200,27 +170,15 @@ class Email
 			$fullname = sprintf("%s %s", $user->firstname, $user->lastname);
 			$email = $user->email;
 			$message = sprintf("<p>%s</p>--<br>%s (%s)<br>Division: %s<br>%s", nl2br(htmlspecialchars($array["message"])), $fullname, $user->vid, $user->division, $email);
-			$result = false;
 
-			if ($config["mail_driver"] == "api")
-				$result = Email::SendApi(
-					["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $fullname, "email" => $email],
-					null,
-					$config["division_email"],
-					$subject,
-					$message
-				);
-			if ($config["mail_driver"] == "smtp")
-				$result = Email::SendSmtp(
-					["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $fullname, "email" => $email],
-					null,
-					$config["division_email"],
-					$subject,
-					$message
-				);
-
+			Email::SendSmtp(
+				["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
+				["name" => $fullname, "email" => $email],
+				null,
+				$config["division_email"],
+				$subject,
+				$message
+			);
 			return 0;
 		}
 		else
@@ -229,7 +187,7 @@ class Email
 	}
 
 	/**
-	 * Preparing email message to sending, and actually sends it with choosing the correct driver
+	 * Preparing email message to sending, and actually sends it 
 	 * @param string $message
 	 * @param string $toName
 	 * @param string $toEmail
@@ -243,24 +201,14 @@ class Email
 		{
 			$subject = sprintf("[%s] %s", $config["event_name"], $subject);
 			$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
-			$result = false;
 
-			if ($config["mail_driver"] == "api")
-				$result = Email::SendApi(["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $toName, "email" => $toEmail],
-					null,
-					null,
-					$subject,
-					$message
-				);
-			if ($config["mail_driver"] == "smtp")
-				$result = Email::SendSmtp(["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-					["name" => $toName, "email" => $toEmail],
-					null,
-					null,
-					$subject,
-					$message
-				);
+			$result = Email::SendSmtp(["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
+				["name" => $toName, "email" => $toEmail],
+				null,
+				null,
+				$subject,
+				$message
+			);
 
 			return $result === 0;
 		}
@@ -296,7 +244,7 @@ class Email
 	 */
 	public static function SendFreeText($array)
 	{
-		global $config, $db;
+		global $config;
 		$sesUser = Session::User();
 		$recipientsCode = (int)$array["recipients_code"];
 		$subject = $array["subject"];
@@ -370,24 +318,14 @@ class Email
 				$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
 				$result = false;
 			
-				if ($config["mail_driver"] == "api")
-					$result = Email::SendApi(
-						["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
-						$config["division_email"],
-						null,
-						$toEmails,
-						$subject,
-						$message
-					);
-				if ($config["mail_driver"] == "smtp")
-					$result = Email::SendSmtp(
-						["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
-						$config["division_email"],
-						null,
-						$toEmails,
-						$subject,
-						$message
-					);
+				$result = Email::SendSmtp(
+					["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
+					$config["division_email"],
+					null,
+					$toEmails,
+					$subject,
+					$message
+				);
 
 				if ($result === 0)
 					return 0;

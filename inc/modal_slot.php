@@ -92,15 +92,15 @@
 											</select>
 										</div>										
 										<div class="col">
-											<input class="form-control" id="numSlotBookedBy" type="number" placeholder="VID of requestor" maxlength="6">
+											<input class="form-control" id="numSlotBookedBy" type="number" placeholder="VID of the pilot" maxlength="6">
 										</div>										
 									</div>
 								</div>
 							</div>
-							<div class="form-group row" id="slotRejectMessage">
-								<label class="col-sm-2 col-form-label">Rejection reason:</label>
+							<div class="form-group row" id="slotMessage">
+								<label class="col-sm-2 col-form-label">Message to the user:</label>
 								<div class="col-sm-10">
-									<input class="form-control" type="text" id="txtSlotRejectMessage">
+									<input class="form-control" type="text" id="txtSlotMessage">
 								</div>
 							</div>
 							<div class="form-group row">
@@ -181,7 +181,6 @@
 							<p>
 								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm">SimBrief</a>
 								<a href="http://rfinder.asalink.net/free" target="_blank" class="btn btn-secondary btn-sm">RouteFinder</a>
-								<a href="https://www.ivao.aero/db/route/default.asp" id="lnkSlotIvaoRte" target="_blank" class="btn btn-secondary btn-sm">IVAO Route Database</a>
 							</p>
 						</div>
 					</div>

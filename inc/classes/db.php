@@ -16,7 +16,7 @@ class DB
 		$this->sql = new mysqli($host, $username, $password, $database) or die("Connection failed to the database.");
 	}	
 	
-	public function GetSQL()
+	protected function GetSQL()
 	{
 		return $this->sql;
 	}
@@ -25,6 +25,11 @@ class DB
 	{
 		$this->sql->close();
 	}
+
+  public function GetInsertID()
+  {
+    return $this->sql->insert_id;
+  }
 
 	protected function prep(string $sql, array $arguments): string
   {

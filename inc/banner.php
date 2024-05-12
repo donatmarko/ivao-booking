@@ -11,7 +11,7 @@
 <main class="container" role="main">
 	<?php if (Session::LoggedIn()) : ?>
 		<div class="alert alert-primary">
-			Hello, <?=Session::User()->firstname?>! You are logged in. Why don't you book a flight?
+			Hello, <?=Session::User()->firstname?>. You are logged in. Now there is no excuse for not booking a flight!
 		</div>
 	<?php endif; ?>
 	
