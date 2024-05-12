@@ -29,11 +29,11 @@ INSERT INTO `config` (`key`, `value`) VALUES
 ('event_name', 'Vatican RFE'),
 ('division_web', 'https://va.ivao.aero'),
 ('division_facebook', 'https://www.facebook.com/IVAO.Vatican/'),
-('division_instagram', ''),
-('division_discord', ''),
+('division_instagram', 'https://www.instagram.com/ivao_hu/'),
+('division_discord', 'https://discord.hu.ivao.aero/'),
 ('date_start', '2019-08-19 10:00:00'),
 ('division_email', 'events@va.ivao.aero'),
-('wx_url', 'https://api.donatus.hu/oavi/wx.php'),
+('wx_url', ''),
 ('date_end', '2019-08-19 22:00:00');
 
 CREATE TABLE `flights` (

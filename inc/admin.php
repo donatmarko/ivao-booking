@@ -545,11 +545,11 @@ foreach ($flts as $flt)
 
 				<div class="tab-pane fade active show text-justify" id="tabAbout" role="tabpanel">
 					<h2>About the system</h2>
-					<p>This web application has been developed since 2018 to the IVAO community. Not coincidentally, the influence was given by <a href="https://ivao.aero/Member.aspx?Id=205631" target="_blank">Filipe Fonseca</a>'s RFE system which is widely used on the network.</p>
-					<p>The system has been developed as an "universal" solution (not specifically to one division), and I've always strived for keeping the system easy-to-use on both user and staff side.</p>
+					<p>This web application has been developed for the IVAO community since 2018. Not coincidentally, its influence stems from <a href="https://ivao.aero/Member.aspx?Id=205631" target="_blank">Filipe Fonseca</a>'s RFE system which is widely used on the network.</p>
+					<p>The system has been designed as a "universal" solution, not specifically tailored to one division. I've always strived to maintain the system's ease of use for both users and staff.</p>
 					<p>
-						Backend is PHP using object-oriented concept that ensures the application is easily expandable and modifiable, also new features can be implemented with ease.<br>
-						The frontend design is unified, complies with the <a href="https://brand.ivao.aero/" target="_blank">IVAO Brand Guidelines</a>, responsive, mobile-first and gives a comfy user experience.
+						The backend is PHP-based, utilizing object-oriented concepts to ensure the application is easily expandable and modifiable. Additionally, new features can be implemented with ease.<br>
+						The frontend design adheres to the <a href="https://brand.ivao.aero/" target="_blank">IVAO Brand Guidelines</a>, is responsive, mobile-first, and provides a comfortable user experience.
 					</p>
 
 					<div class="flightCollapses" id="collapses">
@@ -584,11 +584,11 @@ foreach ($flts as $flt)
 								<li>flight booking</li>
 								<li>supporting multi-airport events</li>
 								<li>private slot management</li>
-								<li>email sending either via API or direct SMTP</li>
+								<li>email sending</li>
 								<li>automatic turnover flight detection</li>
 								<li>conflicting flight detection</li>
-								<li>GDPR compliance with optional full name publishing</li>
-								<li>free-text circular email sending to various groups of people</li>
+								<li>GDPR compliance with the possibility to hide full name</li>
+								<li>free-text circular emails to various groups of people</li>
 							</ul>
 						</div>
 

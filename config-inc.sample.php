@@ -22,7 +22,7 @@ define('SQL_DATABASE_NAV', 'booking_nav');
  * URL of the booking system (full path).
  * Needed for the IVAO login API and to the emails.
  */
-$config["url"]                = 'https://rfe.ivao.hu';
+$config["url"]                = 'https://booking.hu.ivao.aero';
 
 /**
  * Maintenance mode.
@@ -34,25 +34,13 @@ $config["login_bypass_api"]   = false;
 
 /**
  * Email settings.
- * "mail_driver" can be 'api' or 'smtp'.
- * 		API mode: using github.com/donatmarko/my-smtp-api
- *     SMTP mode: using PHPMailer class with direct SMTP sending
  */
-$config["mail_driver"]        = 'api';
+$config["mail_enabled"]       = false;
 $config["mail_from_name"]     = 'IVAO Vatican booking system';
 $config["mail_from_email"]    = 'events@ivao.va';
 
-/**
- * donatmarko/my-smtp-api specific settings
- */
-$config["mail_api_url"]       = 'https://api.apiprovider.com/smtp';
-$config["mail_api_key"]       = 'ITSYOURAPIKEYFORTHESMTPAPI';
-
-/**
- * PHPMailer specific settings
- */
 $config["mail_smtp_server"]   = 'mail.example.com';
-$config["mail_smtp_port"]     = 465;
+$config["mail_smtp_port"]     = 587;
 $config["mail_smtp_auth"]     = true;
 $config["mail_smtp_secure"]   = 'tls';
 $config["mail_smtp_username"] = 'smtp@api.example.com';

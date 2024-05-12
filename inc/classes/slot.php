@@ -105,8 +105,7 @@ class Slot
 			{
 				if (!empty($u->email))
 				{
-					$slot = Slot::Find($db->GetSQL()->insert_id);
-					$slot->bookedBy = $u->vid;
+					$slot = Slot::Find($db->GetInsertID());
 					$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
 
 					if (Email::Prepare($email, $u->firstname . " " . $u->lastname, $u->email, "Private slot request"))
@@ -446,13 +445,34 @@ class Slot
 				return $this->Delete();
 			else
 			{
-				if ($array["booked_by"] == $this->bookedBy)
-					$sql = "UPDATE slots SET timeframe_id=" . $array["timeframe_id"] . ", callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . " WHERE id=" . $array["id"];
-				else
-					$sql = "UPDATE slots SET timeframe_id=" . $array["timeframe_id"] . ", callsign='" . $array["callsign"] . "', origin_icao='" . $array["origin_icao"] . "', destination_icao='" . $array["destination_icao"] . "', aircraft_icao='" . $array["aircraft_icao"] . "', aircraft_freighter=" . $array["aircraft_freighter"] . ", terminal='" . $array["terminal"] . "', gate='" . $array["gate"] . "', route='" . $array["route"] . "', booked=" . $array["booked"] . ", booked_by=" . $array["booked_by"] . ", booked_at=NOW() WHERE id=" . $array["id"];
-				
-				if ($db->GetSQL()->query($sql))
-					return 0;
+				if ($array["booked"] == $this->booked)
+					return $db->Query("UPDATE slots SET timeframe_id = §, callsign = §, origin_icao = §, destination_icao = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = § WHERE id = §",
+					$array["timeframe_id"],
+					$array["callsign"],
+					$array["origin_icao"] ,
+					$array["destination_icao"],
+					$array["aircraft_icao"],
+					$array["aircraft_freighter"] == "true",
+					$array["terminal"],
+					$array["gate"],
+					$array["route"],
+					$this->id
+				) ? 0 : -1;
+			else
+					return $db->Query("UPDATE slots SET timeframe_id = §, callsign = §, origin_icao = §, destination_icao = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = §, booked = §, booked_by = §, booked_at = NOW() WHERE id = §",
+					$array["timeframe_id"],
+					$array["callsign"],
+					$array["origin_icao"] ,
+					$array["destination_icao"],
+					$array["aircraft_icao"],
+					$array["aircraft_freighter"] == "true",
+					$array["terminal"],
+					$array["gate"],
+					$array["route"],
+					$array["booked"],
+					$array["booked_by"],
+					$this->id
+				) ? 0 : -1;
 			}
 		}
 		else

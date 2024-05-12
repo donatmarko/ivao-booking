@@ -160,33 +160,33 @@ if (count($apts) > 0)
 		<div class="text-justify">
 			<h3>Instructions for private slot bookings</h3>
 
-			<p>If you want to participate on our event and you didn't find suitable flight, we give you the opportunity to request a so called "private slot". </p>
-			<p>The private slot ensures that you will be able to fly your particular flight at the specified timeframe either as arrival or departure from/to the respective airport.</p>
-			<p>Without private slot booked, the ATCs will <strong>not accept</strong> to handle you if there are no free slots available.</p>
+			<p>If you want to participate in our event but haven't found a suitable flight, you have the opportunity to request a "private slot."</p>
+			<p>A private slot ensures that you can fly your specific flight at the specified timeframe, either as an arrival or departure from/to the respective airport.</p>
+			<p>Please note that without a booked private slot, the ATCs can choose <strong>not to accept</strong> handling your flight if there are no available slots.</p>
 
-			<p>You need private slot for the following types of flight:</p>
+			<p>You need a private slot for the following types of flight:</p>
 			<ul>
 				<li>VFR movements</li>
-				<li>flights with business jets</li>
-				<li>virtual airline and custom flights</li>
+				<li>Flights with business jets</li>
+				<li>Virtual airline and custom flights</li>
 			</ul>
 
 			<div class="bd-callout bd-callout-danger">
 				<h4>Do not request private slot for published flights</h4>
-				<p>Private slots are <strong>only</strong> for the non-advertised flights as mentioned above</p>
+				<p>Private slots are <strong>only</strong> for the non-advertised flights mentioned above</p>
 			</div>
 
-			<p>Requesting a slot doesn't instantly mean it's yours. Our Events staff will review and evaluate your request. If you've set your email address <a href="profile">on your profile,</a> you'll get an email about the result.</p>
+			<p>Requesting a slot does not guarantee immediate approval. Our Events staff will review and evaluate your request. If you have set your email address <a href="profile">on your profile,</a> you will receive an email about the result.</p>
 
-			<p>To request a slot, click the button next to the desired timeframe. Keep in mind that we might advertise more than one slot possibility for one timeframe. <span class="badge badge-danger">Red</span> button means the slot is full, no further requests can be sent.</p>
+			<p>To request a slot, click the button next to the desired timeframe. Please note that we may advertise more than one slot possibility for one timeframe. A <span class="badge badge-danger">red</span> button indicates that the slot is full, and no further requests can be sent.</p>
 
-			<p>Should you have any questions or issues, contact the <?=$config["division_name"]; ?> Events staff through <a href="contact"><strong>our contact form</strong></a>.</p>
+			<p>If  you have any questions or issues, please contact the <?=$config["division_name"]; ?> Events staff through <a href="contact"><strong>our contact form</strong></a>.</p>
 		</div>
 	</div>
 <?php
 }
 else
-	echo '<div class="alert alert-info">There are no airports participating on the event currently. Please check back regularly!</div>';
+	echo '<div class="alert alert-info">Currently, there are no airports participating in the event. Please check back regularly for updates.</div>';
 
 echo '</main>';
 

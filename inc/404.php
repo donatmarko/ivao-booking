@@ -12,7 +12,8 @@
 	<div class="alert alert-danger" role="alert">
 		<h4 class="alert-heading">Not Found</h4>
 		<hr>
-		<p>The requested page is not found because the URL is invalid, or the content has been removed.</p>
+		<p>The requested page cannot be found because the URL is invalid or the content has been removed.</p>
+		<p>Please ensure the URL is correct or contact the division staff for assistance.</p>
 		<a href="banner" class="btn btn-primary btn-lg">Back to home</a>
 	</div>
 </main>

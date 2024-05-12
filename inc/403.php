@@ -12,7 +12,7 @@
 	<div class="alert alert-danger" role="alert">
 		<h4 class="alert-heading">Forbidden</h4>
 		<hr>
-		<p>The requested page is off-limits for you.</p>
-		<p>If you think this message has been appeared by mistake, please contact the division staff!</p>
+		<p>You are not permitted to access the requested page.</p>
+		<p>If you believe this message has appeared in error, please contact the division staff for assistance.</p>
 	</div>
 </main>
