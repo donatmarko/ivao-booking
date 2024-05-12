@@ -147,7 +147,7 @@ class Flight
 						Pages::AddJSinline('
 							swal2({
 								title: "Flight booking has been confirmed!",
-								text: "We\'re waiting for you on the event!",
+								text: "We\'re waiting for you at the event!",
 								type: "success",
 								confirmButtonText: "YAY!",
 								timer: 5000,
@@ -158,7 +158,7 @@ class Flight
 						Pages::AddJSinline('
 							swal2({
 								title: "You have no access to confirm the booking!",
-								text: "If you are logged in with other VID than the original booker, please log out!",
+								text: "If you are logged in with a different VID than the original booker, please log out.",
 								type: "error",
 								confirmButtonText: "RIP",
 								timer: 5000,
@@ -169,7 +169,7 @@ class Flight
 						Pages::AddJSinline('
 							swal2({
 								title: "Error while confirming the flight!",
-								text: "An unknown error has happened during the process. Please try again!",
+								text: "An unknown error occured during the process. Please try again!",
 								type: "error",
 								confirmButtonText: "RIP",
 								timer: 5000,
@@ -184,7 +184,7 @@ class Flight
 				Pages::AddJSinline('
 					swal2({
 						title: "No flight has been found with the given token!",
-						text: "Probably the flight has already been confirmed, or the token is invalid.",
+						text: "The flight has likely already been confirmed, or the token is invalid.",
 						type: "error",
 						confirmButtonText: "RIP",
 						timer: 5000,

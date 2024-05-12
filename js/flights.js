@@ -167,7 +167,7 @@ function getFlight(id)
 			$("#fltBtnsConfirm").hide();
 			if (data.booked == "free")
 			{
-				$("#fltInfobox").html("This flight is available for booking.")
+				$("#fltInfobox").html("This flight is available.")
 					.attr("class", "alert alert-success");
 				$("#fltBookedBy").hide();
 				$("#btnFltBook").show();					
@@ -179,7 +179,7 @@ function getFlight(id)
 					$("#fltBtnsDefault").hide();
 					$("#fltBtnsConfirm").show();
 					$("#fltInfobox").attr("class", "alert alert-warning")
-						.html("<p>Please book <strong>only</strong> if you have real intentions to accomplish this flight!</p><div>Don't abuse the event with booking flights just to block them from other members! Thank you.</div>");
+						.html("Please book <strong>only</strong> if you have genuine intentions to complete this flight!<div>Do not abuse the event by booking flights solely to block them from other members! Thank you.</div>");
 					$("#btnFltConfirm").attr("onclick", "bookFlight(" + id + ")");
 				});
 			}
@@ -187,7 +187,7 @@ function getFlight(id)
 			{
 				if (data.booked == "prebooked")
 				{
-					$("#fltInfobox").html("This flight has been prebooked.")
+					$("#fltInfobox").html("This flight has been pre-booked.")
 						.attr("class", "alert alert-warning")
 				}
 				if (data.booked == "booked")
@@ -261,7 +261,6 @@ function getFlight(id)
 					.attr("onclick", "getWx('#fltWxResult', '" + data.wxUrl + "?icao=" + data.destinationIcao + "&type=metar')");
 				$("#fltTafDestination").html("TAF " + data.destinationIcao)
 					.attr("onclick", "getWx('#fltWxResult', '" + data.wxUrl + "?icao=" + data.destinationIcao + "&type=taf')");
-				$("#lnkFltIvaoRte").prop("href", "https://www.ivao.aero/db/route/route.asp?start=" + data.originIcao + "&end=" + data.destinationIcao);
 			}
 			else
 				$("#btnFltBriefing").hide();
@@ -283,7 +282,7 @@ function bookFlight(id)
 			{
 				swal2({
 					title: "Flight has been booked!",
-					text: "If you've provided your email address earlier, you'll get a confirmation email very soon.",
+					text: "If you have provided your email address earlier, you wll receive a confirmation email very soon.",
 					type: "success",
 					confirmButtonText: "YAY!",
 					timer: 5000,
@@ -293,7 +292,7 @@ function bookFlight(id)
 			{
 				swal2({
 					title: "Someone else was faster :-(",
-					text: "A member already booked this flight. You'll be redirected back to the flight list to look for an other one!",
+					text: "Another member has already booked this flight. You will be redirected back to the flight list to look for another one!",
 					type: "error",
 					confirmButtonText: "OK",
 				}).then((value) => {  window.location.reload(); });
@@ -302,7 +301,7 @@ function bookFlight(id)
 			{
 				swal2({
 					title: "You have an other booked flight in this interval!",
-					html: "If you rather wish to book the present flight, please delete the previous reservation!<br>Conflicting flight(s): " + data.callsigns,
+					html: "If you would rather book the present flight, please delete the previous reservation.<br>Conflicting flight(s): " + data.callsigns,
 					type: "error",
 					confirmButtonText: "OK",
 				}).then((value) => { $("#flight").modal("hide"); });
@@ -317,7 +316,6 @@ function freeFlight(id)
 {
 	swal2({
 		title: "Are you sure you want to delete this booking?",
-		text: "Well, you can book again (as far as it's available) but it's a habit to ask for confirmation.",
 		type: "warning",
 		showCancelButton: true,
 		cancelButtonText: "No, don't delete",
@@ -336,7 +334,7 @@ function freeFlight(id)
 					{
 						swal2({
 							title: "Booking has been deleted!",
-							text: "Thank you for giving chance to the others to fly this flight :-)",
+							text: "Thank you for giving others the chance to fly this flight :-)",
 							type: "success",
 							confirmButtonText: "^^",
 							timer: 3000,
@@ -346,7 +344,7 @@ function freeFlight(id)
 					{
 						swal2({
 							title: "Error while deleting the booking!",
-							text: "No idea what has happened. Please notify the staff to delete the booking manually. Page will be reloaded.",
+							text: "I'm not sure what happened. Please notify the staff to delete the booking manually. The page will be reloaded.",
 							type: "error",
 							confirmButtonText: "RIP",
 						}).then(() => { $("#flight").modal("hide"); window.location.reload(); });

@@ -19,8 +19,8 @@
 			</div>
 			<form id="frmEmail">
 				<div class="modal-body">
-					<p>However it's not compulsory, we strongly recommend to enter it. Without it you can only "pre-book", and the Events staff might decide to delete the unconfirmed bookings if the interest become high on the flights.</p>
-					<p>We won't send spam, only the confirmation mails per flight, and if there are, the additional infos (e.g. flight briefing). You won't be opted-in to newsletters either.</p>					
+					<p>While it is not mandatory, we strongly recommend entering it. Without it, you can only "pre-book," and the Events staff might decide to delete unconfirmed bookings if interest in the flights becomes high.</p>
+					<p>We will not send spam; only confirmation emails per flight and, if available, additional information (e.g., flight briefing). You will not be automatically opted into newsletters either.</p>
 					<p>You can always withdraw providing your email address by editing your profile.</p>
 					<div class="input-group">
 						<div class="input-group-prepend">
