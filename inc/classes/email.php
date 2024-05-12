@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -61,107 +61,107 @@ class Email
 
 		$cfg_smtp = new PHPMailer\PHPMailer\PHPMailer(true);
 		try
-        {       
-            $cfg_smtp->SMTPDebug = 0;
-            $cfg_smtp->isSMTP();                    
-            $cfg_smtp->Host = $config["mail_smtp_server"];
-            $cfg_smtp->SMTPAuth = $config["mail_smtp_auth"];
-            $cfg_smtp->Username = $config["mail_smtp_username"];
-            $cfg_smtp->Password = $config["mail_smtp_password"];
-            $cfg_smtp->SMTPSecure = $config["mail_smtp_secure"];
-            $cfg_smtp->Port = $config["mail_smtp_port"];
-            $cfg_smtp->CharSet = "UTF-8";
+		{       
+			$cfg_smtp->SMTPDebug = 0;
+			$cfg_smtp->isSMTP();                    
+			$cfg_smtp->Host = $config["mail_smtp_server"];
+			$cfg_smtp->SMTPAuth = $config["mail_smtp_auth"];
+			$cfg_smtp->Username = $config["mail_smtp_username"];
+			$cfg_smtp->Password = $config["mail_smtp_password"];
+			$cfg_smtp->SMTPSecure = $config["mail_smtp_secure"];
+			$cfg_smtp->Port = $config["mail_smtp_port"];
+			$cfg_smtp->CharSet = "UTF-8";
 
-            // set from
-            if (is_string($from))
-                $cfg_smtp->setFrom($from);
-            else if (!array_key_exists('name', $from))
-                $cfg_smtp->setFrom($from['email']);
-            else
-                $cfg_smtp->setFrom($from['email'], $from['name']);
-        
-            // missing recipient
-            if ($tos == null)
-                return 1;
-            else
-            {
-                if (is_array($tos) && !isArrayAssociative($tos))
-                {
-                    foreach($tos as $to)
-                    {
-                        if (is_string($to))
-                            $cfg_smtp->addAddress($to);
-                        else if (!array_key_exists('name', $to))
-                            $cfg_smtp->addAddress($to['email']);
-                        else
-                            $cfg_smtp->addAddress($to['email'], $to['name']);
-                    }
-                }
-                else if (is_string($tos))
-                    $cfg_smtp->addAddress($tos);
-                else if (!array_key_exists('name', $tos))
+			// set from
+			if (is_string($from))
+				$cfg_smtp->setFrom($from);
+			else if (!array_key_exists('name', $from))
+				$cfg_smtp->setFrom($from['email']);
+			else
+				$cfg_smtp->setFrom($from['email'], $from['name']);
+		
+			// missing recipient
+			if ($tos == null)
+				return 1;
+			else
+			{
+				if (is_array($tos) && !isArrayAssociative($tos))
+				{
+					foreach($tos as $to)
+					{
+						if (is_string($to))
+							$cfg_smtp->addAddress($to);
+						else if (!array_key_exists('name', $to))
+							$cfg_smtp->addAddress($to['email']);
+						else
+							$cfg_smtp->addAddress($to['email'], $to['name']);
+					}
+				}
+				else if (is_string($tos))
+					$cfg_smtp->addAddress($tos);
+				else if (!array_key_exists('name', $tos))
 					$cfg_smtp->addAddress($tos['email']);
 				else
 					$cfg_smtp->addAddress($tos['email'], $tos['name']);
 			}
 
-            // adding Carbon Copy
-            if ($ccs != null)
-            {
-                if (is_array($ccs) && !isArrayAssociative($ccs))
-                {
-                    foreach($ccs as $cc)
-                    {
-                        if (is_string($cc))
-                            $cfg_smtp->addCC($cc);
+			// adding Carbon Copy
+			if ($ccs != null)
+			{
+				if (is_array($ccs) && !isArrayAssociative($ccs))
+				{
+					foreach($ccs as $cc)
+					{
+						if (is_string($cc))
+							$cfg_smtp->addCC($cc);
 						else if (!array_key_exists('name', $cc))
 							$cfg_smtp->addCC($cc['email']);
 						else
 							$cfg_smtp->addCC($cc['email'], $cc['name']);
 					}
-                }
-                else if (is_string($ccs))
-                    $cfg_smtp->addCC($ccs);
-                else if (!array_key_exists('name', $ccs))
+				}
+				else if (is_string($ccs))
+					$cfg_smtp->addCC($ccs);
+				else if (!array_key_exists('name', $ccs))
 					$cfg_smtp->addCC($ccs['email']);
 				else
 					$cfg_smtp->addCC($ccs['email'], $ccs['name']);
 			}
 
-            // adding Blind Carbon Copy
-            if ($bccs != null)
-            {
-                if (is_array($bccs) && !isArrayAssociative($bccs))
-                {
-                    foreach($bccs as $bcc)
-                    {
-                        if (is_string($bcc))
-                            $cfg_smtp->addBCC($bcc);
-                        else if (!array_key_exists('name', $bcc))
-                            $cfg_smtp->addBCC($bcc['email']);
-                        else
-                            $cfg_smtp->addBCC($bcc['email'], $bcc['name']);
-                    }
-                }
-                else if (is_string($bccs))
-                    $cfg_smtp->addBCC($bccs);
-                else if (!array_key_exists('name', $bccs))
-                    $cfg_smtp->addBCC($bccs['email']);
-                else
-                    $cfg_smtp->addBCC($bccs['email'], $bccs['name']);
-            }
+			// adding Blind Carbon Copy
+			if ($bccs != null)
+			{
+				if (is_array($bccs) && !isArrayAssociative($bccs))
+				{
+					foreach($bccs as $bcc)
+					{
+						if (is_string($bcc))
+							$cfg_smtp->addBCC($bcc);
+						else if (!array_key_exists('name', $bcc))
+							$cfg_smtp->addBCC($bcc['email']);
+						else
+							$cfg_smtp->addBCC($bcc['email'], $bcc['name']);
+					}
+				}
+				else if (is_string($bccs))
+					$cfg_smtp->addBCC($bccs);
+				else if (!array_key_exists('name', $bccs))
+					$cfg_smtp->addBCC($bccs['email']);
+				else
+					$cfg_smtp->addBCC($bccs['email'], $bccs['name']);
+			}
 
-            $cfg_smtp->isHTML(true);
-            $cfg_smtp->Subject = $subject;
-            $cfg_smtp->Body    = $message;            
+			$cfg_smtp->isHTML(true);
+			$cfg_smtp->Subject = $subject;
+			$cfg_smtp->Body    = $message;            
 			$cfg_smtp->send();
 			return 0;
-        }
-        catch (Exception $e)
-        {
-            // error in SMTP process
-            return 2;
-        }
+		}
+		catch (Exception $e)
+		{
+			// error in SMTP process
+			return 2;
+		}
 	}
 
 	/**
@@ -195,11 +195,11 @@ class Email
 					break;
 			}
 
-			$subject = "[" . $config["event_name"] . "] " . $subject . " " . date("d/m/Y H:i");
+			$subject = sprintf("[%s] %s %s", $config["event_name"], $subject, date("d/m/Y H:i"));
 			$user = Session::User();
-			$fullname = $user->firstname . " " . $user->lastname;
+			$fullname = sprintf("%s %s", $user->firstname, $user->lastname);
 			$email = $user->email;
-			$message = "<p>" . nl2br(htmlspecialchars($array["message"])) . "</p><p>--<br>" . $fullname . " (" . $user->vid . ")<br>Division: " . $user->division . "<br>" . $email . "</p>";
+			$message = sprintf("<p>%s</p>--<br>%s (%s)<br>Division: %s<br>%s", nl2br(htmlspecialchars($array["message"])), $fullname, $user->vid, $user->division, $email);
 			$result = false;
 
 			if ($config["mail_driver"] == "api")
@@ -241,7 +241,7 @@ class Email
 		global $config;
 		if (Session::LoggedIn())
 		{
-			$subject = "[" . $config["event_name"] . "] " . $subject;
+			$subject = sprintf("[%s] %s", $config["event_name"], $subject);
 			$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
 			$result = false;
 
@@ -366,13 +366,13 @@ class Email
 			{
 				$toEmails = array_values(array_unique($toEmails));
 
-				$subject = "[" . $config["event_name"] . "] " . $subject;
+				$subject = sprintf("[%s] %s", $config["event_name"], $subject);
 				$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
 				$result = false;
 			
 				if ($config["mail_driver"] == "api")
 					$result = Email::SendApi(
-						["name" => $sesUser->firstname . " " . $sesUser->lastname, "email" => $config["mail_from_email"]],
+						["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
 						$config["division_email"],
 						null,
 						$toEmails,
@@ -381,7 +381,7 @@ class Email
 					);
 				if ($config["mail_driver"] == "smtp")
 					$result = Email::SendSmtp(
-						["name" => $sesUser->firstname . " " . $sesUser->lastname, "email" => $config["mail_from_email"]],
+						["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
 						$config["division_email"],
 						null,
 						$toEmails,
@@ -405,8 +405,10 @@ class Email
 	private static function getSignature()
 	{
 		global $config;		
-		return '<p>--<br>
-			This email has been sent automatically, please do not reply! Should you have any questions, use <a href="' . $config["url"] . '/contact">our contact form</a> in the booking system.<br>
-			To opt-out from receiving such emails, we kindly invite you to remove your email address on your profile.</p>';
+		return sprintf('<p>--<br>
+			This email has been sent automatically, please do not reply! Should you have any questions, use <a href="%s/contact">our contact form</a> in the booking system.<br>
+			To opt-out from receiving such emails, we kindly invite you to remove your email address on your profile.</p>',
+			$config["url"]
+		);
 	}
 }

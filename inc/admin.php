@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -58,15 +58,15 @@ foreach ($flts as $flt)
 							<table class="table">
 								<tr>
 									<th>Name of event</th>
-									<td><input class="form-control" id="txtEventName" type="text" placeholder="e.g. RFE Vatican" required value="<?=$config["event_name"]?>"></td>
+									<td><input class="form-control" id="txtEventName" type="text" placeholder="e.g. RFE Vatican" required value="<?=$config["event_name"]; ?>"></td>
 								</tr>
 								<tr>
 									<th>Booking status</th>
 									<td>
 										<select class="form-control" id="selMode">
-											<option value="0"<?=($config["mode"] == 0 ? " selected" : "")?>>not opened yet</option>
-											<option value="1"<?=($config["mode"] == 1 ? " selected" : "")?>>open</option>
-											<option value="2"<?=($config["mode"] == 2 ? " selected" : "")?>>closed</option>
+											<option value="0"<?=($config["mode"] == 0 ? " selected" : ""); ?>>not opened yet</option>
+											<option value="1"<?=($config["mode"] == 1 ? " selected" : ""); ?>>open</option>
+											<option value="2"<?=($config["mode"] == 2 ? " selected" : ""); ?>>closed</option>
 										</select>
 									</td>
 								</tr>
@@ -79,7 +79,7 @@ foreach ($flts as $flt)
 										<div class="form-row">
 											<div class="col">
 												<div class="input-group date dtp" id="dtpEventStart" data-target-input="nearest">
-													<input type="text" class="form-control datetimepicker-input" data-target="#dtpEventStart" value="<?=Config::getDateStart()?>">
+													<input type="text" class="form-control datetimepicker-input" data-target="#dtpEventStart" value="<?=Config::getDateStart(); ?>">
 													<div class="input-group-append" data-target="#dtpEventStart" data-toggle="datetimepicker">
 														<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
 													</div>
@@ -87,7 +87,7 @@ foreach ($flts as $flt)
 											</div>
 											<div class="col">
 												<div class="input-group date dtp" id="dtpEventEnd" data-target-input="nearest">
-													<input type="text" class="form-control datetimepicker-input" data-target="#dtpEventEnd" value="<?=Config::getDateEnd()?>">
+													<input type="text" class="form-control datetimepicker-input" data-target="#dtpEventEnd" value="<?=Config::getDateEnd(); ?>">
 													<div class="input-group-append" data-target="#dtpEventEnd" data-toggle="datetimepicker">
 														<span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
 													</div>
@@ -104,14 +104,14 @@ foreach ($flts as $flt)
 									<td>
 										<div class="form-row">									
 											<div class="col">
-												<input class="form-control" id="txtDivisionName" type="text" placeholder="e.g. IVAO Hungary" required value="<?=$config["division_name"]?>">
+												<input class="form-control" id="txtDivisionName" type="text" placeholder="e.g. IVAO Hungary" required value="<?=$config["division_name"]; ?>">
 											</div>
 											<div class="col">
 												<div class="input-group">
 													<div class="input-group-prepend">
 														<div class="input-group-text"><i class="fas fa-globe-americas"></i></div>
 													</div>
-													<input class="form-control" id="txtDivisionWeb" type="text" placeholder="e.g. www.ivao.hu" required value="<?=$config["division_web"]?>">																								
+													<input class="form-control" id="txtDivisionWeb" type="text" placeholder="e.g. www.ivao.hu" required value="<?=$config["division_web"]; ?>">																								
 												</div>											
 											</div>	
 											<div class="col">
@@ -119,7 +119,7 @@ foreach ($flts as $flt)
 													<div class="input-group-prepend">
 														<div class="input-group-text"><i class="fas fa-at"></i></div>
 													</div>
-													<input class="form-control" id="txtDivisionEmail" type="email" placeholder="e.g. events@ivao.hu" required value="<?=$config["division_email"]?>">																								
+													<input class="form-control" id="txtDivisionEmail" type="email" placeholder="e.g. events@ivao.hu" required value="<?=$config["division_email"]; ?>">																								
 												</div>											
 											</div>									
 										</div>
@@ -138,19 +138,27 @@ foreach ($flts as $flt)
 													<div class="input-group-prepend">
 														<div class="input-group-text"><i class="fab fa-facebook-f"></i></div>
 													</div>
-													<input class="form-control" id="txtDivisionFacebook" type="text" placeholder="Facebook link" value="<?=$config["division_facebook"]?>">																								
+													<input class="form-control" id="txtDivisionFacebook" type="text" placeholder="Facebook link" value="<?=$config["division_facebook"]; ?>">																								
 												</div>											
 											</div>	
 											<div class="col">
 												<div class="input-group">
 													<div class="input-group-prepend">
-														<div class="input-group-text"><i class="fab fa-twitter"></i></div>
+														<div class="input-group-text"><i class="fab fa-instagram"></i></div>
 													</div>
-													<input class="form-control" id="txtDivisionTwitter" type="text" placeholder="Twitter link" value="<?=$config["division_twitter"]?>">																								
+													<input class="form-control" id="txtDivisionInstagram" type="text" placeholder="Instagram link" value="<?=$config["division_instagram"]; ?>">																								
 												</div>											
-											</div>									
+											</div>								
+											<div class="col">
+												<div class="input-group">
+													<div class="input-group-prepend">
+														<div class="input-group-text"><i class="fab fa-discord"></i></div>
+													</div>
+													<input class="form-control" id="txtDivisionDiscord" type="text" placeholder="Discord link" value="<?=$config["division_discord"]; ?>">																								
+												</div>											
+											</div>		
 										</div>
-										<div class="text-muted"><small>Leave empty if the division doesn't have any of them</small></div>
+										<div class="text-muted"><small>Leave empty if the division doesn't have either of them</small></div>
 									</td>
 								</tr>
 								<tr>
@@ -159,7 +167,7 @@ foreach ($flts as $flt)
 										<small>do not modify without reason</small>
 									</th>
 									<td>
-										<input class="form-control" id="txtWxUrl" type="text" value="<?=$config["wx_url"]?>">
+										<input class="form-control" id="txtWxUrl" type="text" value="<?=$config["wx_url"]; ?>">
 										<div class="text-muted"><small>To disable the weather request feature at the flight briefing, simply remove the URL above</small></div>
 									</td>
 								</tr>							
@@ -245,7 +253,7 @@ foreach ($flts as $flt)
 				</div>
 
 				<div class="tab-pane fade" id="tabUsers" role="tabpanel">
-					<h2>Users & permissions <button class="btn btn-secondary btn-sm float-right" onclick="aNewUser()">New user</button></h2>
+					<h2>Users & permissions</h2>
 
 					<div id="editUser" class="collapse card">
 						<h5 class="card-header">
@@ -506,7 +514,7 @@ foreach ($flts as $flt)
 									<div class="card-body">
 										<div class="form-group">
 											<label for="txtAdminEmailFrom">From:</label>
-											<input type="text" id="txtAdminEmailFrom" readonly class="form-control" value="<?=$fullname . " <" . $config["division_email"] . ">"?>">
+											<input type="text" id="txtAdminEmailFrom" readonly class="form-control" value="<?=$fullname . " <" . $config["division_email"] . ">"; ?>">
 										</div>
 										<div class="form-group">
 											<label for="selAdminEmailRecipients">Recipients:</label>
@@ -552,8 +560,8 @@ foreach ($flts as $flt)
 								<strong>Donat Marko</strong> (<a href="https://ivao.aero/Member.aspx?Id=540147" target="_blank">540147</a>)
 							</p>
 							<p>
-								Ideas, recommendations:<br>
-								<strong>-/-</strong> (<a href="https://ivao.aero/Member.aspx?Id=100000" target="_blank">100000</a>)
+								Contribution with IVAO OAuth API:<br>
+								<strong>Kanin Pornsinsiriruk</strong> (<a href="https://ivao.aero/Member.aspx?Id=512878" target="_blank">512878</a>)
 							</p>
 							<p>
 								Testing <small>(booking random flights and tolerating dozens of spams in their mailbox):</small><br>

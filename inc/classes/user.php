@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -20,7 +20,7 @@ class User
 	public static function Find($vid)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM users WHERE vid=" . $vid))
+		if ($query = $db->Query("SELECT * FROM users WHERE vid = §", $vid))
 		{
 			if ($row = $query->fetch_assoc())
 				return new User($row);
@@ -36,7 +36,7 @@ class User
 	public static function FindId($id)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM users WHERE id=" . $id))
+		if ($query = $db->Query("SELECT * FROM users WHERE id = §", $id))
 		{
 			if ($row = $query->fetch_assoc())
 				return new User($row);
@@ -52,7 +52,7 @@ class User
 	{
 		global $db;
 		$users = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM users"))
+		if ($query = $db->Query("SELECT * FROM users"))
 		{
 			while ($row = $query->fetch_assoc())
 				$users[] = new User($row);
@@ -60,22 +60,6 @@ class User
 		return $users;
 	}
 
-	/**
-	 * Creates a new profile manually (used by the admin area through AJAX)
-	 * @return int error code: 0 = no error, -1 = other error, 403 = forbidden
-	 */
-	public static function Create($array)
-	{
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			global $db;
-			$query = "INSERT INTO users (permission, vid, firstname, lastname, division, email, privacy) VALUES (" . $array["permission"] . ", " . $array["vid"] . ", '" . $array["firstname"] . "', '" . $array["lastname"] . "', '" . $array["division"] . "', '" . $array["email"] . "', " . $array["privacy"] . ")";
-			return $db->GetSQL()->query($query) ? 0 : -1;
-		}
-		else
-			return 403;
-	}
-	
 	/**
 	 * Function is called by the Session::IVAOLogin() function if user does not exist
 	 * Inserts one new row to the users database table
@@ -85,8 +69,18 @@ class User
 	public static function IVAORegister($data)
 	{
 		global $db;
-		$query = "INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, division, country, skype, staff, last_login, privacy) VALUES (1, " . $data->vid . ", '" . $data->firstname . "', '" . $data->lastname . "', " . $data->ratingatc . ", " . $data->ratingpilot . ", '" . $data->division . "', '" . $data->country . "', '" . $data->skype . "', '" . $data->staff . "', now(), false)";
-		return $db->GetSQL()->query($query);
+		return $db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, NOW(), §)",
+			1,
+			$data->vid,
+			$data->firstname,
+			$data->lastname,
+			$data->ratingatc,
+			$data->ratingpilot,
+			$data->division,
+			$data->country,
+			$data->staff,
+			true
+		);
 	}
 	
 	/**
@@ -98,8 +92,23 @@ class User
 	public static function IVAOUpdate($data)
 	{
 		global $db;
-		$query = "UPDATE users SET " . ($data->vid == 540147 ? "permission=2," : "") . " firstname='" . $data->firstname . "', lastname='" . $data->lastname . "', rating_atc=" . $data->ratingatc . ", rating_pilot=" . $data->ratingpilot . ", division='" . $data->division . "', country='" . $data->country . "', skype='" . $data->skype . "', staff='" . $data->staff . "', last_login=now() WHERE vid=" . $data->vid;
-		return $db->GetSQL()->query($query);
+
+		if ($data->vid == 540147)
+		{
+			$db->Query("UPDATE users SET permission = 2 WHERE vid = §", $data->vid);
+		}
+
+		return $db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, last_login = NOW() WHERE vid = §",
+			$data->firstname,
+			$data->lastname,
+			$data->ratingatc,
+			$data->ratingpilot,
+			$data->division,
+			$data->country,
+			$data->staff,
+			$data->vid
+		);
+
 	}
 
 	/**
@@ -116,7 +125,7 @@ class User
 		return json_encode($users);
 	}
 
-	public $id, $vid, $firstname, $lastname, $ratingAtc, $ratingPilot, $division, $country, $skype, $staff, $permission, $email, $privacy;
+	public $id, $vid, $firstname, $lastname, $ratingAtc, $ratingPilot, $division, $country, $staff, $permission, $email, $privacy;
 	public function __construct($row)
 	{
 		$this->id = (int)$row["id"];
@@ -127,7 +136,6 @@ class User
 		$this->ratingPilot = (int)$row["rating_pilot"];
 		$this->division = $row["division"];
 		$this->country = $row["country"];
-		$this->skype = $row["skype"];
 		$this->staff = $row["staff"];
 		$this->permission = (int)$row["permission"];
 		$this->email = $row["email"];
@@ -140,7 +148,7 @@ class User
 	 */
 	public function getAtcBadge()
 	{
-		return '<img src="https://www.ivao.aero/data/images/ratings/atc/' . $this->ratingAtc . '.gif" alt="" class="img-fluid">';
+		return sprintf('<img src="https://www.ivao.aero/data/images/ratings/atc/%s.gif" alt="" class="img-fluid"> ', $this->ratingAtc);
 	}
 	
 	/**
@@ -149,7 +157,7 @@ class User
 	 */
 	public function getPilotBadge()
 	{
-		return '<img src="https://www.ivao.aero/data/images/ratings/pilot/' . $this->ratingPilot . '.gif" alt="" class="img-fluid">';
+		return sprintf('<img src="https://www.ivao.aero/data/images/ratings/pilot/%s.gif" alt="" class="img-fluid"> ', $this->ratingPilot);
 	}
 	
 	/**
@@ -171,12 +179,11 @@ class User
 		// if ($div == "XU") $div = "GB";
 		// if ($div == "XZ") $div = "ZA";
 
-		$imgUrl = "img/flags/$size/$div.png";
-
+		$imgUrl = sprintf("img/flags/%s/%s.png", $size, $div);
 		if (!file_exists($imgUrl))
-			$imgUrl = "https://www.ivao.aero/data/images/badge/" . $div . ".gif";
+			$imgUrl = sprintf("https://www.ivao.aero/data/images/badge/%s.gif", $div);
 		
-		return '<img data-toggle="tooltip" title="' . $this->division . '" src="' . $imgUrl . '" alt="' . $this->division . '" title="' . $this->division . '" class="img-fluid">';
+		return sprintf('<img data-toggle="tooltip" title="%s" src="%s" alt="%s" title="%s" class="img-fluid">', $this->division, $imgUrl, $this->division, $this->division);
 	}
 	
 	/**
@@ -188,7 +195,7 @@ class User
 	public function getFullname()
 	{
 		if (Session::LoggedIn() && ($this->privacy || Session::User()->permission >= 2))
-			return $this->firstname . " " . $this->lastname;
+			return sprintf("%s %s", $this->firstname, $this->lastname);
 		else
 			return "(not disclosable)";
 	}
@@ -203,8 +210,16 @@ class User
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
 			global $db;
-			$query = "UPDATE users SET vid=" . $array["vid"] . ", firstname='" . $array["firstname"] . "', lastname='" . $array["lastname"] . "', division='" . $array["division"] . "', permission=" . $array["permission"] . ", email='" . $array["email"] . "', privacy=" . $array["privacy"] . " WHERE id=" . $this->id;
-			return $db->GetSQL()->query($query) ? 0 : -1;
+			return $db->Query("UPDATE users SET vid = §, firstname = §, lastname = §, division = §, permission = §, email = §, privacy = § WHERE id = §",
+				$array["vid"],
+				$array["firstname"],
+				$array["lastname"],
+				$array["division"],
+				$array["permission"],
+				$array["email"],
+				$array["privacy"] == "true",
+				$this->id
+			) ? 0 : -1;
 		}
 		else
 			return 403;
@@ -218,8 +233,7 @@ class User
 	public function UpdateProfile($array)
 	{
 		global $db;
-		$query = "UPDATE users SET email='" . $array["email"] . "', privacy=" . $array["privacy"] . " WHERE vid=" . $this->vid;
-		return $db->GetSQL()->query($query) ? 0 : -1;
+		return $db->Query("UPDATE users SET email = §, privacy = § WHERE vid = §", $array["email"], $array["privacy"] == "true", $this->vid) ? 0 : -1;
 	}
 	
 	/**
@@ -230,8 +244,7 @@ class User
 	public function UpdateEmail($array)
 	{
 		global $db;
-		$query = "UPDATE users SET email='" . $array["email"] . "' WHERE vid=" . $this->vid;
-		return $db->GetSQL()->query($query) ? 0 : -1;
+		return $db->Query("UPDATE users SET email = § WHERE vid = §", $array["email"], $this->vid) ? 0 : -1;
 	}
 	
 	/**
@@ -252,7 +265,6 @@ class User
 			unset($user["lastname"]);
 			unset($user["email"]);
 			unset($user["staff"]);
-			unset($user["skype"]);
 			unset($user["country"]);
 		}
 		
@@ -308,7 +320,7 @@ class User
 		global $db;
 		
 		$flights = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights WHERE booked>0 AND booked_by=" . $this->vid . " ORDER BY departure_time, flight_number"))
+		if ($query = $db->Query("SELECT * FROM flights WHERE booked > 0 AND booked_by = § ORDER BY departure_time, flight_number", $this->vid))
 		{
 			while ($row = $query->fetch_assoc())
 				$flights[] = new Flight($row);
@@ -346,7 +358,7 @@ class User
 		global $db;
 		
 		$slots = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM slots WHERE booked_by=" . $this->vid . " ORDER BY timeframe_id"))
+		if ($query = $db->Query("SELECT * FROM slots WHERE booked_by = § ORDER BY timeframe_id", $this->vid))
 		{
 			while ($row = $query->fetch_assoc())
 				$slots[] = new Slot($row);
@@ -363,7 +375,7 @@ class User
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("DELETE FROM users WHERE id=" . $this->id))
+			if ($db->Query("DELETE FROM users WHERE id = §", $this->id))
 				return 0;
 		}
 		else

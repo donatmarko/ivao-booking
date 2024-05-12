@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -23,29 +23,6 @@ function getHumanDateTime($dt)
 }
 
 /**
- * Decides whether given string starts with the given part or not
- * @param string $query
- * @param string $string
- * @return bool
- */
-function startsWith($query, $string)
-{
-	return substr($string, 0, strlen($query)) === $query;
-}
-
-/**
- * Decides whether the given string ends with the given parameter or not.
- * @param string $query
- * @param string $string
- * @return bool
- */
-function endsWith($query, $string)
-{
-	$length = strlen($query);
-	return $length === 0 || (substr($string, -$length) === $query);
-}
-
-/**
  * Function redirects to a specified URL according to the following:
  * 		if headers has already been sent, uses JavaScript,
  * 		otherwise set the headers to the specified location
@@ -54,7 +31,9 @@ function endsWith($query, $string)
 function redirect($url)
 {
 	if (headers_sent())
-		die("<script>window.location.href='$url';</script>");
+	{
+		die(sprintf("<script>window.location.href='%s';</script>", $url));
+	}
 	else
 	{
 		header("Location: $url");
@@ -131,6 +110,17 @@ function isArrayAssociative(array $arr)
 		return false;
 	ksort($arr);
 	return array_keys($arr) !== range(0, count($arr) - 1);
+}
+
+function str_replace_first($from, $to, $haystack): string
+{
+	$from = '/' . preg_quote($from, '/') . '/';
+	return preg_replace($from, $to, $haystack, 1);
+}
+
+function is_surely_number(string $number): bool
+{
+	return is_numeric($number) && !str_starts_with($number, "0") && !str_ends_with($number, ".") && !str_contains(strtolower($number), "e");
 }
   
 ?>

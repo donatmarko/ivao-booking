@@ -2,14 +2,16 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
 
 // only for debug purposes
-// ini_set("display_errors", "on");
-// error_reporting(E_ALL);
+ini_set("display_errors", "on");
+error_reporting(E_ALL);
+
+$start_time = microtime(true);
 
 date_default_timezone_set('Etc/UTC');
 require 'config-inc.php';
@@ -29,7 +31,7 @@ require 'inc/classes/timeframe.php';
 require 'vendor/autoload.php';
 session_start();
 
-$page = isset($_GET["f"]) ? $_GET["f"] : "";
+$page = $_GET["f"] ?? "";
 $db = new DB(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
 $dbNav = new DB(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE_NAV);
 
@@ -78,15 +80,17 @@ Menu::addItems([
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="author" content="Donat Marko">
-	<?=Session::GetXsrfToken("meta")?>
-	<title><?=$config["event_name"]?> booking system | <?=$config["division_name"]?></title>
+	<meta name="xsrf-token" content="<?=$_SESSION["xsrfToken"]; ?>">
+	<title><?=$config["event_name"]; ?> Booking System | <?=$config["division_name"]; ?></title>
 	<link rel="stylesheet" href="css/bootstrap.min.css">
 	<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
 	<link rel="stylesheet" href="node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css">
 	<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css">
 	<link rel="stylesheet" href="node_modules/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css">
 	<link rel="stylesheet" href="css/style.css">
-	<?=Session::GetXsrfToken("js")?>
+	<script>
+		var XSRF_TOKEN = "<?=$_SESSION["xsrfToken"]; ?>";
+	</script>
 </head>
 
 <body>
@@ -120,19 +124,23 @@ echo Pages::Get();
 	<div class="container">
 		<div class="row">
 			<div class="col-md-4">
-				<p>&copy; 2018 <a href="<?=$config["division_web"]?>" target="_blank"><?=$config["division_name"]?></a></p>
+				<p>&copy; <?=date("Y"); ?> <a href="<?=$config["division_web"]; ?>" target="_blank"><?=$config["division_name"]; ?></a></p>
 				<p><i class="far fa-envelope-open"></i> <a href="contact">Contact us!</a></p>
 			</div>
 			<div class="col-md-4 text-md-center">
-<?php if (!empty($config["division_facebook"])): ?>
-				<p><i class="fab fa-facebook-f"></i> <a href="<?=$config["division_facebook"]?>" target="_blank">Find us on Facebook</a></p>
-<?php endif; ?>
-<?php if (!empty($config["division_twitter"])): ?>
-				<p><i class="fab fa-twitter"></i> <a href="<?=$config["division_twitter"]?>" target="_blank">Find us on Twitter</a></p>
-<?php endif; ?>
+				<?php if (!empty($config["division_facebook"])): ?>
+					<p><i class="fab fa-facebook-f"></i> <a href="<?=$config["division_facebook"]; ?>" target="_blank">Find us on Facebook</a></p>
+				<?php endif; ?>
+				<?php if (!empty($config["division_instagram"])): ?>
+					<p><i class="fab fa-instagram"></i> <a href="<?=$config["division_instagram"]; ?>" target="_blank">Find us on Instagram</a></p>
+				<?php endif; ?>
+				<?php if (!empty($config["division_discord"])): ?>
+					<p><i class="fab fa-discord"></i> <a href="<?=$config["division_discord"]; ?>" target="_blank">Join us on Discord</a></p>
+				<?php endif; ?>
 			</div>
 			<div class="col-md-4 text-md-right">
 				<p>Developed by <a href="https://www.ivao.aero/Member.aspx?ID=540147" target="_blank">Donat Marko (540147)</a></p>
+				<p>Loaded in <?=round((microtime(true) - $start_time) * 1000, 2); ?> ms</p>
 			</div>
 		</div>
 	</div>
@@ -151,7 +159,7 @@ echo Pages::Get();
 <script src="node_modules/tempusdominus-bootstrap-4/build/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="node_modules/ckeditor/ckeditor.js"></script>
 <script src="https://unpkg.com/leaflet-arc/bin/leaflet-arc.min.js"></script>
-<?=Pages::GetJS()?>
+<?=Pages::GetJS(); ?>
 
 </body>
 

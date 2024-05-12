@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -18,7 +18,7 @@ class Config
 	public static function Get()
 	{
 		global $db, $config;
-		if ($query = $db->GetSQL()->query("SELECT `key`, `value` FROM config"))
+		if ($query = $db->Query("SELECT `key`, `value` FROM config"))
 		{
 			while ($row = $query->fetch_assoc())
 				Config::$config[$row["key"]] = $row["value"];
@@ -37,7 +37,7 @@ class Config
 	public static function Write($key, $value)
 	{
 		global $db;
-		return $db->GetSQL()->query("UPDATE config SET `value`='$value' WHERE `key`='$key'") ? 0 : -1;
+		return $db->Query("UPDATE config SET `value` = § WHERE `key` = §", $value, $key) ? 0 : -1;
 	}
 
 	/**
@@ -56,7 +56,8 @@ class Config
 				Config::Write("division_web", $array["division_web"]) == 0 &&
 				Config::Write("division_email", $array["division_email"]) == 0 &&
 				Config::Write("division_facebook", $array["division_facebook"]) == 0 &&
-				Config::Write("division_twitter", $array["division_twitter"]) == 0 &&
+				Config::Write("division_discord", $array["division_discord"]) == 0 &&
+				Config::Write("division_instagram", $array["division_instagram"]) == 0 &&
 				Config::Write("wx_url", $array["wx_url"]) == 0 &&
 				Config::Write("date_start", $array["date_start"]) == 0 &&
 				Config::Write("date_end", $array["date_end"]) == 0)

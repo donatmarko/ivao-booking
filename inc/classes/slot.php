@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -53,7 +53,7 @@ class Slot
 	public static function Find($id)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM slots WHERE id=" . $id))
+		if ($query = $db->Query("SELECT * FROM slots WHERE id = §", $id))
 		{
 			if ($row = $query->fetch_assoc())
 				return new Slot($row);
@@ -70,7 +70,7 @@ class Slot
 		global $db;
 		$flts = [];
 
-		if ($query = $db->GetSQL()->query("SELECT * FROM slots ORDER BY departure_time, slotbooking_number"))
+		if ($query = $db->Query("SELECT * FROM slots ORDER BY departure_time, slotbooking_number"))
 		{
 			while ($row = $query->fetch_assoc())
 				$flts[] = new Slot($row);
@@ -89,11 +89,23 @@ class Slot
 		if (Session::LoggedIn())
 		{
 			$u = Session::User();
-			if ($db->GetSQL()->query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, gate, route, booked, booked_by, booked_at) VALUES ('" . $array["timeframe_id"] . "', '" . $array["callsign"] . "', '" . $array["origin_icao"] . "', '" . $array["destination_icao"] . "', '" . $array["aircraft_icao"] . "', " . $array["aircraft_freighter"] . ", 'TBD', '" . $array["route"] . "', 1, " . $u->vid . ", NOW())"))
+			if ($db->Query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, NOW())",
+				$array["timeframe_id"],
+				$array["callsign"],
+				$array["origin_icao"],
+				$array["destination_icao"],
+				$array["aircraft_icao"],
+				$array["aircraft_freighter"] == "true",
+				'',
+				'TBD',
+				$array["route"],
+				1,
+				$u->vid
+			))
 			{
 				if (!empty($u->email))
 				{
-					$slot = @new Slot($_POST);
+					$slot = Slot::Find($db->GetSQL()->insert_id);
 					$slot->bookedBy = $u->vid;
 					$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
 
@@ -106,6 +118,7 @@ class Slot
 		}
 		else
 			return 403;
+
 		return -1;
 	}
 
@@ -263,14 +276,13 @@ class Slot
 	public function getAircraftName()
 	{
 		global $dbNav;
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM aircrafts WHERE icao='" . $this->aircraftIcao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
 		{
 			if ($row = $query->fetch_assoc())
 			{
 				if ($this->aircraftFreighter)
-					return $row["name"] . " (freighter)";
-				else
-					return $row["name"];
+					return sprintf("%s (freighter)", $row["name"]);
+				return $row["name"];
 			}
 		}
 		return "";
@@ -347,7 +359,7 @@ class Slot
 
 		if (Session::LoggedIn() && ($sesUser->permission > 1 || $sesUser->vid == $this->bookedBy))
 		{
-			if ($db->GetSQL()->query("DELETE FROM slots WHERE id=" . $this->id))
+			if ($db->Query("DELETE FROM slots WHERE id = §", $this->id))
 				return 0;
 		}
 		else
@@ -476,7 +488,7 @@ class Slot
 		$gcd = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
 		$speed = 250;
 
-		if ($query = $dbNav->GetSQL()->query("SELECT * FROM aircrafts where icao='" . $this->aircraftIcao . "'"))
+		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
 		{
 			if ($row = $query->fetch_assoc())
 			{

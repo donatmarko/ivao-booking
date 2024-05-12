@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -180,7 +180,7 @@ if (count($apts) > 0)
 
 			<p>To request a slot, click the button next to the desired timeframe. Keep in mind that we might advertise more than one slot possibility for one timeframe. <span class="badge badge-danger">Red</span> button means the slot is full, no further requests can be sent.</p>
 
-			<p>Should you have any questions or issues, contact the <?=$config["division_name"]?> Events staff through <a href="contact"><strong>our contact form</strong></a>.</p>
+			<p>Should you have any questions or issues, contact the <?=$config["division_name"]; ?> Events staff through <a href="contact"><strong>our contact form</strong></a>.</p>
 		</div>
 	</div>
 <?php

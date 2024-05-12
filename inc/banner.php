@@ -2,19 +2,18 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
 ?>
 
 <main class="container" role="main">
-<?php if (Session::LoggedIn()) : ?>
+	<?php if (Session::LoggedIn()) : ?>
 		<div class="alert alert-primary">
-			Hello, <?=Session::User()->firstname?>! You are logged in.
+			Hello, <?=Session::User()->firstname?>! You are logged in. Why don't you book a flight?
 		</div>
-<?php endif; ?>
+	<?php endif; ?>
 	
-<?php include_once("contents/banner.html"); ?>
-
+	<?php include_once("contents/banner.html"); ?>
 </main>

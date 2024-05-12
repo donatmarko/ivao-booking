@@ -29,7 +29,8 @@ $("#frmGeneral").submit(function(e) {
 	var divisionWeb = $("#txtDivisionWeb").val();
 	var divisionEmail = $("#txtDivisionEmail").val();
 	var divisionFacebook = $("#txtDivisionFacebook").val();
-	var divisionTwitter = $("#txtDivisionTwitter").val();
+	var divisionDiscord = $("#txtDivisionDiscord").val();
+	var divisionInstagram = $("#txtDivisionInstagram").val();
 	var wxUrl = $("#txtWxUrl").val();
 	var dateStart = $("#dtpEventStart").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
 	var dateEnd = $("#dtpEventEnd").datetimepicker("viewDate").format("YYYY-MM-DD HH:mm:00");
@@ -38,7 +39,21 @@ $("#frmGeneral").submit(function(e) {
 		cache: false,
 		type: "POST",
 		url: "json",
-		data: { "type": "admin", "action": "updateGeneral", "event_name": eventName, "mode": mode, "division_name": divisionName, "division_web": divisionWeb, "division_email": divisionEmail, "division_facebook": divisionFacebook, "division_twitter": divisionTwitter, "wx_url": wxUrl, "date_start": dateStart, "date_end": dateEnd },
+		data: {
+			"type": "admin", 
+			"action": "updateGeneral", 
+			"event_name": eventName, 
+			"mode": mode, 
+			"division_name": divisionName, 
+			"division_web": divisionWeb, 
+			"division_email": divisionEmail, 
+			"division_facebook": divisionFacebook, 
+			"division_discord": divisionDiscord, 
+			"division_instagram": divisionInstagram, 
+			"wx_url": wxUrl, 
+			"date_start": dateStart, 
+			"date_end": dateEnd
+		},
 		success: function(data) {
 			if (data && data.error == 0)
 			{
@@ -324,22 +339,6 @@ function aGetUser(id)
 			scroll("#editUser");
 		}
 	});
-}
-
-function aNewUser()
-{
-	$("#lblUser").html("Add new user");
-	$("#userId").val(Number(-1));
-	$("#numUserVid").val(null);
-	$("#txtUserFirstname").val(null);
-	$("#txtUserLastname").val(null);
-	$("#txtUserDivision").val(null);
-	$("#txtUserEmail").val(null);
-	$("#chkUserPrivacy").prop("checked", false);
-	$("#selUserPermission").val(1);
-	$("#btnUserDelete").hide();
-	$("#editUser").collapse("show");
-	scroll("#editUser");
 }
 
 function aCloseUser()

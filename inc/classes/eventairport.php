@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -20,7 +20,7 @@ class EventAirport
 	public static function Find($icao)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM airports WHERE icao='" . $icao . "'"))
+		if ($query = $db->Query("SELECT * FROM airports WHERE icao = §", $icao))
 		{
 			if ($row = $query->fetch_assoc())
 				return new EventAirport($row);
@@ -36,7 +36,7 @@ class EventAirport
 	public static function FindId($id)
 	{
 		global $db;
-		if ($query = $db->GetSQL()->query("SELECT * FROM airports WHERE id=" . $id))
+		if ($query = $db->Query("SELECT * FROM airports WHERE id = §", $id))
 		{
 			if ($row = $query->fetch_assoc())
 				return new EventAirport($row);
@@ -57,9 +57,9 @@ class EventAirport
 		if ($disabledsToo)
 			$sql = "SELECT * FROM airports ORDER BY `order`";
 		else
-			$sql = "SELECT * FROM airports WHERE enabled=true ORDER BY `order`";
+			$sql = "SELECT * FROM airports WHERE enabled = true ORDER BY `order`";
 
-		if ($query = $db->GetSQL()->query($sql))
+		if ($query = $db->Query($sql))
 		{
 			while ($row = $query->fetch_assoc())
 				$apts[] = new EventAirport($row);
@@ -94,7 +94,7 @@ class EventAirport
 			"booked" => 0
 		];
 
-		if ($query = $db->GetSQL()->query("SELECT booked, COUNT(*) AS num FROM flights GROUP BY booked"))
+		if ($query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights GROUP BY booked"))
 		{
 			while ($row = $query->fetch_assoc())
 			{
@@ -145,7 +145,7 @@ class EventAirport
 	{
 		global $db;
 		$flights = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights WHERE origin_icao='" . $this->icao . "' ORDER BY departure_time, flight_number"))
+		if ($query = $db->Query("SELECT * FROM flights WHERE origin_icao = § ORDER BY departure_time, flight_number", $this->icao))
 		{
 			while ($row = $query->fetch_assoc())
 				$flights[] = new Flight($row);
@@ -161,7 +161,7 @@ class EventAirport
 	{
 		global $db;
 		$flights = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM flights WHERE destination_icao='" . $this->icao . "' ORDER BY arrival_time, flight_number"))
+		if ($query = $db->Query("SELECT * FROM flights WHERE destination_icao = § ORDER BY arrival_time, flight_number", $this->icao))
 		{
 			while ($row = $query->fetch_assoc())
 			{
@@ -184,8 +184,8 @@ class EventAirport
 			"booked" => 0
 		];
 
-		if ($query = $db->GetSQL()->query("SELECT booked, COUNT(*) AS num FROM flights WHERE origin_icao='" . $this->icao . "' OR destination_icao='" . $this->icao . "' GROUP BY booked"))
-		{
+		if ($query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights WHERE origin_icao = § OR destination_icao = § GROUP BY booked", $this->icao, $this->icao))
+		{ 
 			while ($row = $query->fetch_assoc())
 			{
 				switch ($row["booked"])
@@ -231,7 +231,7 @@ class EventAirport
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("UPDATE airports SET icao='" . $array["icao"] . "', name='" . $array["name"] . "', `order`='" . $array["order"] . "', enabled=" . $array["enabled"] . " WHERE id=" . $this->id))
+			if ($db->Query("UPDATE airports SET icao = §, name = §, `order` = §, enabled = § WHERE id = §", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true", $this->id))
 				return 0;
 		}
 		else
@@ -249,7 +249,7 @@ class EventAirport
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("INSERT INTO airports (icao, name, `order`, enabled) VALUES ('" . $array["icao"] . "', '" . $array["name"] . "', " . $array["order"] . ", " . $array["enabled"] . ")"))
+			if ($db->Query("INSERT INTO airports (icao, name, `order`, enabled) VALUES (§, §, §, §)", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true"))
 				return 0;
 		}
 		else
@@ -266,7 +266,7 @@ class EventAirport
 		global $db;
 		if (Session::LoggedIn() && Session::User()->permission > 1)
 		{
-			if ($db->GetSQL()->query("DELETE FROM airports WHERE id=" . $this->id))
+			if ($db->Query("DELETE FROM airports WHERE id = §", $this->id))
 				return 0;
 		}
 		else
@@ -282,7 +282,7 @@ class EventAirport
 	{
 		global $db;
 		$tfs = [];
-		if ($query = $db->GetSQL()->query("SELECT * FROM timeframes WHERE airport_icao='" . $this->icao . "' ORDER BY time"))
+		if ($query = $db->Query("SELECT * FROM timeframes WHERE airport_icao = § ORDER BY time", $this->icao))
 		{
 			while ($row = $query->fetch_assoc())
 				$tfs[] = new Timeframe($row);

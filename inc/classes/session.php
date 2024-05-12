@@ -2,7 +2,7 @@
 /**
  * Flight booking system for RFE or similar events.
  * Created by Donat Marko (IVAO VID 540147) 
- * Any artwork/content displayed on IVAO is understood to comply with the IVAO Intellectual Property Policy (https://doc.ivao.aero/rules2:ipp)
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
  * @copyright 2024 Donat Marko | www.donatus.hu
  */
@@ -36,7 +36,6 @@ class Session
 			$_SESSION["LOGIN"]->ratingpilot = 10;
 			$_SESSION["LOGIN"]->division = "VA";
 			$_SESSION["LOGIN"]->country = "VA";
-			$_SESSION["LOGIN"]->skype = "peter.griffin";
 			$_SESSION["LOGIN"]->staff = "VA-DIR:VA-TC";
 		}
 
@@ -169,20 +168,6 @@ class Session
 	}
 
 	/**
-	 * Returns XSRF token in formatted or unformatted way
-	 * @param enum (meta, js) - META: meta tag, JS: javascript snippet (storing as global variable), OTHER: plain text
-	 * @return string
-	 */
-	public static function GetXsrfToken($type)
-	{
-		if ($type == "meta")
-			return '<meta name="xsrf-token" value="' . $_SESSION["xsrfToken"] . '">';
-		if ($type == "js")
-			return '<script>var XSRF_TOKEN = "' . $_SESSION["xsrfToken"] . '";</script>';
-		return $_SESSION["xsrfToken"];
-	}
-
-	/**
 	 * Processes requests and acts accordingly
 	 * Called at main
 	 */
@@ -214,9 +199,9 @@ class Session
 			// In maintenace mode we accept GET requests as well
 			$requestArray = $config["maintenance"] ? $_REQUEST : $_POST;
 
-			$type = isset($requestArray["type"]) ? $requestArray["type"] : null;
-			$id = isset($requestArray["id"]) ? $requestArray["id"] : null;
-			$action = isset($requestArray["action"]) ? $requestArray["action"] : null;
+			$type = $requestArray["type"] ?? null;
+			$id = $requestArray["id"] ?? null;
+			$action = $requestArray["action"] ?? null;
 			
 			if ($type == "flights")
 			{
@@ -344,8 +329,6 @@ class Session
 				{
 					if ($action == "getall")
 						echo User::ToJsonAll(true);		
-					elseif ($action == "create")
-						echo json_encode(["error" => User::Create($requestArray)]);			
 					else
 					{
 						$u = User::FindId($id);

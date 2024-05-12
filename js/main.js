@@ -106,16 +106,26 @@ $(document).ready(function () {
 		}
 	});
 });
+
 $.ajaxSetup({
-	data: { "xsrfToken": XSRF_TOKEN }
+  headers: {
+    "X_XSRF_TOKEN": document.head.querySelector("[name='xsrf-token'][content]")
+      .content,
+  },  
+	data: { "xsrfToken": XSRF_TOKEN },
+  dataType: "json",
+  url: "json",
 });
+
 $(document).ajaxStart(function() {
 	$(".loader").show();
 });
+
 $(document).ajaxComplete(function() {
 	$(".loader").hide();
 	$('[data-toggle="tooltip"]').tooltip();
 });
+
 $(document).ajaxError(function(xhr, error, thrownError) {
 	console.log(xhr, error, thrownError);
 	notification(null);
