@@ -194,10 +194,11 @@ class User
 	 */
 	public function getFullname()
 	{
-		if (Session::LoggedIn() && ($this->privacy || Session::User()->permission >= 2))
+		$sesUser = Session::User();
+		if (Session::LoggedIn() && ($this->privacy || $sesUser->permission >= 2 || $sesUser->vid == $this->vid))
 			return sprintf("%s %s", $this->firstname, $this->lastname);
-		else
-			return "(not disclosable)";
+		
+		return "(not disclosable)";
 	}
 
 	/**

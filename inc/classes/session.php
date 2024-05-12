@@ -47,7 +47,7 @@ class Session
 			else
 				User::IVAORegister($_SESSION["LOGIN"]);
 			
-			redirect("/");
+			redirect($config["url"]);
 		}
 		else
 			redirect("newlogin_ivao.php?url=" . $config["url"]);
@@ -132,9 +132,10 @@ class Session
 	 */
 	public static function IVAOLogout()
 	{
+		global $config;
 		session_destroy();
 		setcookie("IVAO_LOGIN", "", time()-3600);
-		redirect("/");
+		redirect($config["url"]);
 	}
 	
 	/**

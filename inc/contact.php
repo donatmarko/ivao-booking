@@ -18,7 +18,7 @@ $u = Session::User();
 	<form id="frmContact">
 		<div class="form-group">
 			<label for="txtCfName">Your name</label>
-			<input type="text" class="form-control" id="txtCfName" value="<?=$u->firstname . " " . $u->lastname?>" readonly>
+			<input type="text" class="form-control" id="txtCfName" value="<?=$u->getFullname(); ?>" readonly>
 		</div>
 		<div class="form-group">
 			<label for="txtCfEmail">Your email address</label>
