@@ -38,7 +38,7 @@ class Session
 			$_SESSION["LOGIN"]->country = "VA";
 			$_SESSION["LOGIN"]->staff = "VA-DIR:VA-TC";
 		}
-
+				
 		if (isset($_SESSION["LOGIN"]))
 		{
 			Session::GenerateXsrfToken();
@@ -50,7 +50,9 @@ class Session
 			redirect($config["url"]);
 		}
 		else
+		{
 			redirect("newlogin_ivao.php?url=" . $config["url"]);
+		}
 	}
 
 	/**
@@ -112,19 +114,19 @@ class Session
 			if (!Session::LoggedIn())
 				Session::redirIfNotThere("maintenance");
 		}
-
+		
 		/**
 		 * If page is admin, and we're logged in with lower permission than 2,
 		 * or we are not logged in at all, redirects to the main page
 		 */
-		if (($page == "admin" || $page == "teszt") && ((Session::LoggedIn() && Session::User()->permission < 2) || !Session::LoggedIn()))
-			redirect("/");
+		if (Session::LoggedIn() && Session::User()->permission < 2 && in_array($page, ["admin"]))
+			redirect($config["url"]);
 		
 		/**
 		 * If page is for logged in users only, and we're not logged in, redirects to the main page
 		 */
-		if (!Session::LoggedIn() && ($page == "profile" || $page == "mybookings"))
-			redirect("/");	
+		if (!Session::LoggedIn() && in_array($page, ["profile", "mybookings"]))
+			redirect($config["url"]);	
 	}
 	
 	/**

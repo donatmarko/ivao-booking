@@ -29,7 +29,7 @@ function getHumanDateTime($dt)
  * @param string $url
  */
 function redirect($url)
-{
+{	
 	if (headers_sent())
 	{
 		die(sprintf("<script>window.location.href='%s';</script>", $url));
