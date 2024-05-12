@@ -89,20 +89,17 @@ Menu::addItems([
 	<link rel="stylesheet" href="node_modules/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css">
 	<link rel="stylesheet" href="css/style.css">
 	<script>
-		var XSRF_TOKEN = "<?=$_SESSION["xsrfToken"]; ?>";
+		const XSRF_TOKEN = "<?=$_SESSION["xsrfToken"]; ?>";
 	</script>
 </head>
 
 <body>
 
 <?php	
-echo Menu::Get();
-Pages::AddJS("main");
-
 switch ($page)
 {
 	case "login":
-		Session::IVAOLogin();
+		Session::IVAOLogin();		
 		break;
 	case "logout":
 		Session::IVAOLogout();
@@ -116,6 +113,9 @@ switch ($page)
 			Pages::Add("modal_email");
 		break;
 }
+
+echo Menu::Get();
+Pages::AddJS("main");
 
 echo Pages::Get();	
 ?>
