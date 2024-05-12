@@ -35,7 +35,7 @@ $config["login_bypass_api"]   = false;
 /**
  * Email settings.
  */
-$config["mail_enabled"]       = false;
+$config["mail_enabled"]       = true;
 $config["mail_from_name"]     = 'IVAO Vatican booking system';
 $config["mail_from_email"]    = 'events@ivao.va';
 
