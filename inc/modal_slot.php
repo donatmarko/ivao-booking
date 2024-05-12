@@ -97,10 +97,10 @@
 									</div>
 								</div>
 							</div>
-							<div class="form-group row" id="slotMessage">
-								<label class="col-sm-2 col-form-label">Message to the user:</label>
+							<div class="form-group row" id="slotRejectMessage">
+								<label class="col-sm-2 col-form-label">Rejection message:</label>
 								<div class="col-sm-10">
-									<input class="form-control" type="text" id="txtSlotMessage">
+									<input class="form-control" type="text" id="txtSlotRejectMessage">
 								</div>
 							</div>
 							<div class="form-group row">
