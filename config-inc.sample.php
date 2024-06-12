@@ -22,7 +22,7 @@ define('SQL_DATABASE_NAV', 'booking_nav');
  * URL of the booking system (full path).
  * Needed for the IVAO login API and to the emails.
  */
-$config["url"]                = 'https://booking.hu.ivao.aero';
+define('SITE_URL',         'https://booking.hu.ivao.aero/');
 
 /**
  * Maintenance mode.
@@ -30,6 +30,14 @@ $config["url"]                = 'https://booking.hu.ivao.aero';
  * Normally this mode should be disabled, this way only accepts POST requests.
  */
 $config["login_bypass_api"]   = false;
+
+/**
+ * IVAO SSO parameters.
+ * Can be requested through https://developers.ivao.aero/
+ */
+define('IVAOSSO_CLIENT_ID',      'your-client-id');
+define('IVAOSSO_CLIENT_SECRET',  'your-client-secret');
+define('IVAOSSO_REDIRECT_URI',   'https://booking.hu.ivao.aero/auth/callback');
 
 /**
  * Email settings.
