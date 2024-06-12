@@ -85,7 +85,7 @@ CREATE TABLE `users` (
   `lastname` varchar(30) NOT NULL,
   `rating_atc` varchar(3) NOT NULL,
   `rating_pilot` varchar(3) NOT NULL,
-  `email` text NULL,
+  `email` varchar(50) NOT NULL,
   `privacy` tinyint(1) NOT NULL,
   `division` varchar(2) NOT NULL,
   `country` varchar(2) NOT NULL,
