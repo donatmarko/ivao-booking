@@ -69,13 +69,14 @@ class User
 	public static function IVAORegister($data)
 	{
 		global $db;
-		return $db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, NOW(), §)",
+		return $db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, email, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, NOW(), §)",
 			1,
 			$data->vid,
 			$data->firstname,
 			$data->lastname,
 			$data->ratingatc,
 			$data->ratingpilot,
+			"",
 			$data->division,
 			$data->country,
 			$data->staff,
