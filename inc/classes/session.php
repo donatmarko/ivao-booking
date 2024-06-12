@@ -47,28 +47,14 @@ class Session
 			else
 				User::IVAORegister($_SESSION["LOGIN"]);
 			
-			redirect($config["url"]);
+			redirect(SITE_URL);
 		}
 		else
 		{
-			redirect("newlogin_ivao.php?url=" . $config["url"]);
+			redirect("newlogin_ivao.php?url=" . SITE_URL);
 		}
 	}
 
-	/**
-	 * Function is called by /auth/callback
-	 * This fuction will received call back from IVAO Oauth2 then redirect the code and state to the new login page
-	 * Redirect to the newlogin_ivao.php file
-	 */
-    public static function OAuth2Callback()
-	{
-        if (isset($_GET['code']) && isset($_GET['state'])) {
-            redirect('Location: newlogin_ivao.php?code='. $_GET['code'] . '&state=' . $_GET['state']);
-        } else {
-            redirect('Location: newlogin_ivao.php');
-        }
-    }
-	
 	/**
 	 * Function redirects to the specified page if we are not already there, and we're not on login and logout pages
 	 * @param $p name of the page
@@ -120,13 +106,13 @@ class Session
 		 * or we are not logged in at all, redirects to the main page
 		 */
 		if (Session::LoggedIn() && Session::User()->permission < 2 && in_array($page, ["admin"]))
-			redirect($config["url"]);
+			redirect(SITE_URL);
 		
 		/**
 		 * If page is for logged in users only, and we're not logged in, redirects to the main page
 		 */
 		if (!Session::LoggedIn() && in_array($page, ["profile", "mybookings"]))
-			redirect($config["url"]);	
+			redirect(SITE_URL);	
 	}
 	
 	/**
@@ -137,7 +123,7 @@ class Session
 		global $config;
 		session_destroy();
 		setcookie("IVAO_LOGIN", "", time()-3600);
-		redirect($config["url"]);
+		redirect(SITE_URL);
 	}
 	
 	/**
@@ -199,19 +185,16 @@ class Session
 				}
 			}
 
-			// In maintenace mode we accept GET requests as well
-			$requestArray = $config["maintenance"] ? $_REQUEST : $_POST;
-
-			$type = $requestArray["type"] ?? null;
-			$id = $requestArray["id"] ?? null;
-			$action = $requestArray["action"] ?? null;
+			$type = $_POST["type"] ?? null;
+			$id = $_POST["id"] ?? null;
+			$action = $_POST["action"] ?? null;
 			
 			if ($type == "flights")
 			{
 				if ($action == "getall")
 					echo Flight::ToJsonAll();
 				elseif ($action == "create")
-					echo json_encode(["error" => Flight::Create($requestArray)]);
+					echo json_encode(["error" => Flight::Create($_POST)]);
 				else
 				{
 					$f = Flight::Find($id);
@@ -238,7 +221,7 @@ class Session
 									break;
 								// modify flight
 								case "update":
-									echo json_encode(["error" => $f->Update($requestArray)]);
+									echo json_encode(["error" => $f->Update($_POST)]);
 									break;
 								// resend confirmation email
 								case "sendconfirmation":
@@ -261,7 +244,7 @@ class Session
 				if ($action == "getall")
 					echo Timeframe::ToJsonAll();
 				elseif ($action == "create")
-					echo json_encode(["error" => Timeframe::Create($requestArray)]);				
+					echo json_encode(["error" => Timeframe::Create($_POST)]);				
 				else
 				{
 					$t = Timeframe::Find($id);
@@ -275,7 +258,7 @@ class Session
 							switch ($action)
 							{
 								case "update":
-									echo json_encode(["error" => $t->Update($requestArray)]);
+									echo json_encode(["error" => $t->Update($_POST)]);
 									break;
 								case "delete":
 									echo json_encode(["error" => $t->Delete()]);
@@ -295,7 +278,7 @@ class Session
 			if ($type == "slots")
 			{
 				if ($action == "create")
-					echo json_encode(["error" => Slot::Create($requestArray)]);
+					echo json_encode(["error" => Slot::Create($_POST)]);
 				else
 				{
 					$s = Slot::Find($id);
@@ -309,7 +292,7 @@ class Session
 							switch ($action)
 							{
 								case "update":
-									echo json_encode(["error" => $s->Update($requestArray)]);
+									echo json_encode(["error" => $s->Update($_POST)]);
 									break;
 								case "delete":
 									echo json_encode(["error" => $s->Delete()]);
@@ -345,7 +328,7 @@ class Session
 								switch ($action)
 								{
 									case "update":
-										echo json_encode(["error" => $u->Update($requestArray)]);
+										echo json_encode(["error" => $u->Update($_POST)]);
 										break;
 									case "delete":
 										echo json_encode(["error" => $u->Delete()]);
@@ -372,7 +355,7 @@ class Session
 					if ($action == "getall")
 						echo EventAirport::ToJsonAll(true);
 					elseif ($action == "create")
-						echo json_encode(["error" => EventAirport::Create($requestArray)]);
+						echo json_encode(["error" => EventAirport::Create($_POST)]);
 					else
 					{
 						$apt = EventAirport::FindId($id);
@@ -386,7 +369,7 @@ class Session
 								switch ($action)
 								{
 									case "update":
-										echo json_encode(["error" => $apt->Update($requestArray)]);
+										echo json_encode(["error" => $apt->Update($_POST)]);
 										break;
 									case "delete":
 										echo json_encode(["error" => $apt->Delete()]);
@@ -410,11 +393,11 @@ class Session
 			{
 				// saving profile via profile page
 				if ($action == "update")
-					echo json_encode(["error" => Session::User()->UpdateProfile($requestArray)]);
+					echo json_encode(["error" => Session::User()->UpdateProfile($_POST)]);
 				
 				// saving email only via modal window
 				if ($action == "updateEmail")
-					echo json_encode(["error" => Session::User()->UpdateEmail($requestArray)]);
+					echo json_encode(["error" => Session::User()->UpdateEmail($_POST)]);
 
 				die();
 			}
@@ -423,15 +406,15 @@ class Session
 			{
 				if ($action == "sendFlightConfirmations")
 					echo json_encode(["error" => Flight::ResendConfirmationEmails()]);
-				if ($action == "sendFreeText" && !empty($requestArray))
-					echo json_encode(["error" => Email::SendFreeText($requestArray)]);
+				if ($action == "sendFreeText" && !empty($_POST))
+					echo json_encode(["error" => Email::SendFreeText($_POST)]);
 				die();
 			}
 
 			if ($type == "admin")
 			{
 				if ($action == "updateGeneral")
-					echo json_encode(["error" => Config::UpdateGeneral($requestArray)]);
+					echo json_encode(["error" => Config::UpdateGeneral($_POST)]);
 				die();
 			}	
 
@@ -446,8 +429,8 @@ class Session
 
 			if ($type == "contact")
 			{
-				if (!empty($requestArray))
-					echo json_encode(["error" => Email::ContactForm($requestArray)]);
+				if (!empty($_POST))
+					echo json_encode(["error" => Email::ContactForm($_POST)]);
 			}
 
 			if ($type == "contents")
@@ -467,7 +450,7 @@ class Session
 							switch ($action)
 							{
 								case "update":
-									echo json_encode(["error" => $c->Update($requestArray)]);
+									echo json_encode(["error" => $c->Update($_POST)]);
 									break;
 								default:
 									echo $c->ToJson();

@@ -29,7 +29,6 @@ $config["url"]                = 'https://booking.hu.ivao.aero';
  * In this mode enabled, AJAX requests could happen through both GET and POST requests for testing purposes.
  * Normally this mode should be disabled, this way only accepts POST requests.
  */
-$config["maintenance"]        = false;
 $config["login_bypass_api"]   = false;
 
 /**

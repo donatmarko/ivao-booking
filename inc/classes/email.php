@@ -230,7 +230,7 @@ class Email
 		$email = str_replace('%firstname%',     $u->firstname,            $email);
 		$email = str_replace('%lastname%',      $u->lastname,             $email);
 		$email = str_replace('%division_name%', $config["division_name"], $email);
-		$email = str_replace('%url%',           $config["url"],           $email);
+		$email = str_replace('%url%',           SITE_URL,                 $email);
 		return $email;
 	}
 
@@ -346,7 +346,7 @@ class Email
 		return sprintf('<p>--<br>
 			This email has been sent automatically, please do not reply! Should you have any questions, use <a href="%s/contact">our contact form</a> in the booking system.<br>
 			To opt-out from receiving such emails, we kindly invite you to remove your email address on your profile.</p>',
-			$config["url"]
+			SITE_URL
 		);
 	}
 }

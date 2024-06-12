@@ -1,6 +1,7 @@
 <?php
 session_start();
 define('COOKIE_NAME', 'IVAO_LOGIN');
+require_once 'config-inc.php';
 
 // Get all URLs we need from the server
 $openid_url = 'https://api.ivao.aero/.well-known/openid-configuration';
@@ -11,10 +12,11 @@ if ($openid_result === FALSE) {
 }
 $openid_data = json_decode($openid_result, true);
 
+$client_id = IVAOSSO_CLIENT_ID;
+$client_secret = IVAOSSO_CLIENT_SECRET;
+$redirect_uri = IVAOSSO_REDIRECT_URI;
+
 // Now we can take care of the actual authentication
-$client_id = 'c1180449-53ac-489a-8471-d66ce7ae0c08';
-$client_secret = 'S8yepvpBYrtoDkb0ZdehZpvAQU4XcyMC';
-$redirect_uri = 'https://test.donatus.hu/auth/callback';
 
 if (isset($_GET['code']) && isset($_GET['state'])) {
     // User has been redirected back from the login page
@@ -136,7 +138,7 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         'country' => $user_res_data['countryId'],
         'staff' => $staffPosition,
     ];
-    header('Location: ' . $_GET["url"] . '/login');
+    header('Location: ' . SITE_URL . '/login');
 } else {
     // First visit : Unauthenticated user
 
