@@ -120,9 +120,9 @@ class Session
 	 */
 	public static function IVAOLogout()
 	{
-		global $config;
+		session_unset();
 		session_destroy();
-		setcookie("IVAO_LOGIN", "", time()-3600);
+		setcookie("IVAO_LOGIN", "", time() - 3600);
 		redirect(SITE_URL);
 	}
 	
