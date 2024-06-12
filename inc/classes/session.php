@@ -73,7 +73,8 @@ class Session
 	 */
 	public static function CheckAccess()
 	{
-		global $db, $config, $page;
+		global $config, $page;
+		$user = Session::User();
 
 		/**
 		 * Generating XSRF token is not present
@@ -83,9 +84,18 @@ class Session
 			Session::GenerateXsrfToken();
 
 		/**
-		 * If user is banned, redirecting him/her to the banned page
+		 * User is logged on, but does not exist in the database.
+		 * Most likely I removed it, but who knows...
 		 */
-		if (Session::LoggedIn() && Session::User()->permission < 1)
+		if (Session::LoggedIn() && $user === null)
+		{
+			Session::redirIfNotThere("logout");
+		}
+
+		/**
+		 * If user is banned, redirecting them to the banned page
+		 */
+		if (Session::LoggedIn() && $user->permission < 1)
 			Session::redirIfNotThere("403");
 
 		/* If maintenance mode is active:
@@ -94,7 +104,7 @@ class Session
 		*/
 		if ($config["mode"] != 1)
 		{
-			if (Session::LoggedIn() && Session::User()->permission < 2)
+			if (Session::LoggedIn() && $user->permission < 2)
 				Session::IVAOLogout();
 			
 			if (!Session::LoggedIn())
@@ -105,13 +115,13 @@ class Session
 		 * If page is admin, and we're logged in with lower permission than 2,
 		 * or we are not logged in at all, redirects to the main page
 		 */
-		if (Session::LoggedIn() && Session::User()->permission < 2 && in_array($page, ["admin"]))
+		if (Session::LoggedIn() && $user->permission < 2 && in_array($page, ["admin"]))
 			redirect(SITE_URL);
 		
 		/**
 		 * If page is for logged in users only, and we're not logged in, redirects to the main page
 		 */
-		if (!Session::LoggedIn() && in_array($page, ["profile", "mybookings"]))
+		if (!Session::LoggedIn() && in_array($page, ["admin", "profile", "mybookings"]))
 			redirect(SITE_URL);	
 	}
 	
