@@ -282,7 +282,7 @@ function bookFlight(id)
 			{
 				swal2({
 					title: "Flight has been booked!",
-					text: "If you have provided your email address earlier, you wll receive a confirmation email very soon.",
+					text: "If you have provided your email address earlier, you will receive a confirmation email very soon.",
 					type: "success",
 					confirmButtonText: "YAY!",
 					timer: 5000,
