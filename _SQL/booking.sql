@@ -89,7 +89,7 @@ CREATE TABLE `users` (
   `privacy` tinyint(1) NOT NULL,
   `division` varchar(2) NOT NULL,
   `country` varchar(2) NOT NULL,
-  `staff` text NOT NULL,
+  `staff` text null default '',
   `permission` int(11) NOT NULL,
   `last_login` datetime NOT NULL
 );
