@@ -1,24 +1,73 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-.navbar-brand, .navbar-nav .nav-item, h1, h2, h3, h4, h5 {
+.navbar-brand, .navbar-nav .nav-item, h1 {
 	font-family: 'Nunito Sans', sans-serif;
 }
 
 body {
 	padding-top: 5rem;
 }
-h1 { margin-bottom: 2rem }
+
+@media (min-width: 1200px) {
+	.container {
+		max-width: 1500px;
+	}
+}
+
+.text-secondary {
+	color: #3c55ac !important
+}
+
+h1 { 
+	font-family: 'Poppins', sans-serif;
+	font-size: 3rem;
+	margin-bottom: 2rem;
+	font-weight: 700;
+	color: #0d2c99;
+	font-style: italic;
+}
+
+h2 {
+	font-family: 'Poppins', sans-serif;
+	font-size: 2rem;
+	font-weight: 600;
+	font-style: italic;
+}
+
+h3, h4, h5 {
+	font-family: 'Poppins', sans-serif;
+	font-weight: 400
+}
+
+.flag-24 {
+	border-radius: 3px;
+}
+
+.flag-32 {
+	border-radius: 5px;
+}
+
+.flag-48 {
+	border-radius: 7px;
+}
+
 .navbar-nav > .nav-item {
 	padding: 0 0.7em;
 }
+
 #arrDepTab > .nav-item {
-	width: 50%;
+	width: 33.33%;
 	text-align: center;
 }
 
 /* Flight list */
 .tblFlights { font-size: 95% }
+
+.tblFlights td, #tblSlots td {
+	vertical-align: middle;
+}
+
 .airport {
 	margin-bottom: 3rem;
 	border: 1px solid #D7D7DC;
@@ -167,22 +216,29 @@ input.input-uppercase {
 	transform: rotate(0deg);
 	transition: all linear 0.25s;
 }   
+
 [data-toggle="collapse"].collapsed:after {
 	transform: rotate(180deg);
 }
+
 .navbar-toggler:after {
 	content: '';
 	display: none;
 }
 
-span.turnoverIcon:after {
+.turnoverIcon {
+	transform-origin: 66% 42% !important;
+	margin: 0 !important;
+}
+
+.turnoverIcon:after {
 	content: "\f2f1";
 	display: inline-block;
 	font: normal normal 900 0.8rem 'Font Awesome\ 5 Free';
 	padding-left: 0.4rem;
 	-webkit-animation: rotation 2s infinite linear;
 	animation: rotation 2s infinite linear;
-	transform-origin: 70% 50%;
+	transform-origin: 66% 73%;
 }
 @-webkit-keyframes rotation {
 	from {
