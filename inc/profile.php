@@ -63,4 +63,37 @@
 			</table>
 		</div>
 	</form>
+
+	<div class="bd-callout bd-callout-info">
+		<h4 class="mb-3">Important!</h4>
+
+		<h5>Why do we store your email address during the event?</h5>
+		<p>Your email address is stored to enable us to contact you with updates, confirmations, and important announcements related to IVAO Real Flight Events (RFE).</p>
+
+		<h5>Who processes your email?</h5>
+		<p>
+			IVAO (International Virtual Aviation Organisation) and its authorized representatives handle your email securely. 
+			We strictly adhere to confidentiality and data protection regulations in the management of your information.
+		</p>
+
+		<h5>How do we use your email and personal information?</h5>
+		<p>Your email and personal information are used to confirm your participation in the RFE. Storing your email also enables us to provide updates, schedules, operational details, and post-event surveys.</p>
+
+		<h5>Applicable retention policy</h5>
+		<p>
+			Your email address will be stored only for the duration of the event and a reasonable period afterward for follow-up correspondence. 
+			It will then be securely deleted unless required for legal or administrative purposes, or if you have given consent to remain in contact for future communications.
+		</p>
+
+		<h5>Your rights</h5>
+		<p class="mb-0">You have the right to:</p>
+		<ul>
+			<li>Request access to all data we hold about you</li>
+			<li>Withdraw your consent to receive further communications at any time</li>
+		</ul>
+
+		<p>If you believe your personal data rights have been violated, you can file a complaint with our Data Protection Officer at <a href="mailto:dpo@ivao.aero">dpo@ivao.aero</a>.</p>
+
+		<p>For more details, please refer to our <a href="https://wiki.ivao.aero/en/home/ivao/privacypolicy" target="_blank">Privacy Policy</a>.</p>
+	</div>
 </main>
