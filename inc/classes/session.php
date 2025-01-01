@@ -39,7 +39,7 @@ class Session
 			$_SESSION["LOGIN"]->staff = "VA-DIR:VA-TC";
 		}
 				
-		if (isset($_SESSION["LOGIN"]))
+		if ($_SESSION["LOGIN"]->vid)
 		{
 			Session::GenerateXsrfToken();
 			if (User::Find($_SESSION["LOGIN"]->vid))
@@ -87,7 +87,7 @@ class Session
 		 * User is logged on, but does not exist in the database.
 		 * Most likely I removed it, but who knows...
 		 */
-		if (Session::LoggedIn() && $user === null)
+		if (Session::LoggedIn() && !$user)
 		{
 			Session::redirIfNotThere("logout");
 		}
@@ -102,7 +102,7 @@ class Session
 		* 		if we are not admins/editors and logged in, logs us out
 		* 		if we are not logged in, redirects to the maintenance page
 		*/
-		if ($config["mode"] != 1)
+		if ($config["mode"] != 1 && $page != "json")
 		{
 			if (Session::LoggedIn() && $user->permission < 2)
 				Session::IVAOLogout();
@@ -153,7 +153,7 @@ class Session
 	 */
 	public static function LoggedIn()
 	{
-		return isset($_SESSION["LOGIN"]);
+		return isset($_SESSION["LOGIN"]) && $_SESSION["LOGIN"]->vid !== null;
 	}
 
 	/**
@@ -174,284 +174,184 @@ class Session
 	{
 		global $page, $config;
 
-		if ($page == "json")
+		if ($page != "json")
+			return;
+	
+		header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header("Pragma: no-cache");
+		header("Content-Type: application/json");
+
+		$type = $_POST["type"] ?? null;
+		$id = $_POST["id"] ?? null;
+		$action = $_POST["action"] ?? null;
+
+		/**
+		 * In case of POST request and not XSRF token present (or invalid XSRF token)
+		 * we're dropping error 419 ("Page Expired" - Laravel specific code but I haven't found better...)
+		 */
+		if ($action != "getflights" && !empty($_POST) && (!isset($_POST["xsrfToken"]) || $_SESSION["xsrfToken"] !== $_POST["xsrfToken"]))
 		{
-			header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-			header("Cache-Control: post-check=0, pre-check=0", false);
-			header("Pragma: no-cache");
-			header("Content-Type: application/json");
-
-			/**
-			 * In case of POST request and not XSRF token present (or invalid XSRF token)
-			 * we're dropping error 419 ("Page Expired" - Laravel specific code but I haven't found better...)
-			 */
-			if (!empty($_POST))
+			// 419 Page Expired
+			echo json_encode(["error" => 419]);
+			die();
+		}
+		
+		if ($type == "flights")
+		{
+			if ($action == "getall")
+				echo Flight::ToJsonAll();
+			elseif ($action == "create")
+				echo json_encode(["error" => Flight::Create($_POST)]);
+			else
 			{
-				if (!isset($_POST["xsrfToken"]) || $_SESSION["xsrfToken"] !== $_POST["xsrfToken"])
-				{
-					// 419 Page Expired
-					echo json_encode(["error" => 419]);
-					die();
-				}
-			}
-
-			$type = $_POST["type"] ?? null;
-			$id = $_POST["id"] ?? null;
-			$action = $_POST["action"] ?? null;
-			
-			if ($type == "flights")
-			{
-				if ($action == "getall")
-					echo Flight::ToJsonAll();
-				elseif ($action == "create")
-					echo json_encode(["error" => Flight::Create($_POST)]);
-				else
-				{
-					$f = Flight::Find($id);
-					
-					if ($f == null)
-						echo json_encode(["error" => 404]);
-					else
-					{
-						if ($action)
-						{
-							switch ($action)
-							{
-								// prebooking flight
-								case "book":
-									echo json_encode(["error" => $f->Prebook()]);
-									break;
-								// delete booking
-								case "free":
-									echo json_encode(["error" => $f->Free()]);
-									break;
-								// delete flight
-								case "delete":
-									echo json_encode(["error" => $f->Delete()]);
-									break;
-								// modify flight
-								case "update":
-									echo json_encode(["error" => $f->Update($_POST)]);
-									break;
-								// resend confirmation email
-								case "sendconfirmation":
-									echo json_encode(["error" => $f->SendConfirmationEmail()]);
-									break;
-								default:
-									echo json_encode(["error" => -1]);
-									break;
-							}
-						}
-						else
-							echo $f->ToJSON();
-					}
-				}
-				die();
-			}
-
-			if ($type == "timeframes")
-			{
-				if ($action == "getall")
-					echo Timeframe::ToJsonAll();
-				elseif ($action == "create")
-					echo json_encode(["error" => Timeframe::Create($_POST)]);				
-				else
-				{
-					$t = Timeframe::Find($id);
-
-					if ($t == null)
-						echo json_encode(["error" => 404]);
-					else
-					{
-						if ($action)
-						{
-							switch ($action)
-							{
-								case "update":
-									echo json_encode(["error" => $t->Update($_POST)]);
-									break;
-								case "delete":
-									echo json_encode(["error" => $t->Delete()]);
-									break;
-								default:
-									echo json_encode(["error" => -1]);
-									break;
-							}
-						}
-						else
-							echo $t->toJsonSlots();
-					}
-				}
-				die();
-			}
-
-			if ($type == "slots")
-			{
-				if ($action == "create")
-					echo json_encode(["error" => Slot::Create($_POST)]);
-				else
-				{
-					$s = Slot::Find($id);
-					
-					if ($s == null)
-						echo json_encode(["error" => 404]);
-					else
-					{
-						if ($action)
-						{
-							switch ($action)
-							{
-								case "update":
-									echo json_encode(["error" => $s->Update($_POST)]);
-									break;
-								case "delete":
-									echo json_encode(["error" => $s->Delete()]);
-									break;
-								default:
-									echo json_encode(["error" => -1]);
-									break;
-							}
-						}
-						else
-							echo $s->ToJson();
-					}
-				}
-				die();
-			}
-
-			if ($type == "users")
-			{
-				if (Session::LoggedIn() && Session::User()->permission > 1)
-				{
-					if ($action == "getall")
-						echo User::ToJsonAll(true);		
-					else
-					{
-						$u = User::FindId($id);
-
-						if ($u == null)
-							echo json_encode(["error" => 404]);
-						else
-						{
-							if ($action)
-							{
-								switch ($action)
-								{
-									case "update":
-										echo json_encode(["error" => $u->Update($_POST)]);
-										break;
-									case "delete":
-										echo json_encode(["error" => $u->Delete()]);
-										break;
-									default:
-										echo json_encode(["error" => -1]);
-										break;
-								}
-							}
-							else
-								echo $u->ToJSON(true, true);
-						}
-					}
-				}
-				else
-					echo json_encode(["error" => 403]);
-				die();
-			}
-
-			if ($type == "eventairports")
-			{
-				if (Session::LoggedIn() && Session::User()->permission > 1)
-				{
-					if ($action == "getall")
-						echo EventAirport::ToJsonAll(true);
-					elseif ($action == "create")
-						echo json_encode(["error" => EventAirport::Create($_POST)]);
-					else
-					{
-						$apt = EventAirport::FindId($id);
-
-						if ($apt == null)
-							echo json_encode(["error" => 404]);
-						else
-						{
-							if ($action)
-							{
-								switch ($action)
-								{
-									case "update":
-										echo json_encode(["error" => $apt->Update($_POST)]);
-										break;
-									case "delete":
-										echo json_encode(["error" => $apt->Delete()]);
-										break;
-									default:
-										echo json_encode(["error" => -1]);
-										break;
-								}
-							}
-							else
-								echo $apt->ToJSON();
-						}
-					}
-				}
-				else
-					echo json_encode(["error" => 403]);
-				die();
-			}
-
-			if ($type == "profile")
-			{
-				// saving profile via profile page
-				if ($action == "update")
-					echo json_encode(["error" => Session::User()->UpdateProfile($_POST)]);
+				$f = Flight::Find($id);
 				
-				// saving email only via modal window
-				if ($action == "updateEmail")
-					echo json_encode(["error" => Session::User()->UpdateEmail($_POST)]);
-
-				die();
-			}
-
-			if ($type == "email")
-			{
-				if ($action == "sendFlightConfirmations")
-					echo json_encode(["error" => Flight::ResendConfirmationEmails()]);
-				if ($action == "sendFreeText" && !empty($_POST))
-					echo json_encode(["error" => Email::SendFreeText($_POST)]);
-				die();
-			}
-
-			if ($type == "admin")
-			{
-				if ($action == "updateGeneral")
-					echo json_encode(["error" => Config::UpdateGeneral($_POST)]);
-				die();
-			}	
-
-			if ($type == "session")
-			{
-				if (Session::LoggedIn())
-					echo Session::User()->ToJson();
-				else
-					echo "null";
-				die();
-			}
-
-			if ($type == "contact")
-			{
-				if (!empty($_POST))
-					echo json_encode(["error" => Email::ContactForm($_POST)]);
-			}
-
-			if ($type == "contents")
-			{
-				if ($action == "getall")
-					echo Content::ToJsonAll();
+				if ($f == null)
+					echo json_encode(["error" => 404]);
 				else
 				{
-					$c = Content::Find($id);
-					
-					if ($c == null)
+					if ($action)
+					{
+						switch ($action)
+						{
+							// prebooking flight
+							case "book":
+								echo json_encode(["error" => $f->Prebook()]);
+								break;
+							// delete booking
+							case "free":
+								echo json_encode(["error" => $f->Free()]);
+								break;
+							// delete flight
+							case "delete":
+								echo json_encode(["error" => $f->Delete()]);
+								break;
+							// modify flight
+							case "update":
+								echo json_encode(["error" => $f->Update($_POST)]);
+								break;
+							// resend confirmation email
+							case "sendconfirmation":
+								echo json_encode(["error" => $f->SendConfirmationEmail()]);
+								break;
+							case "getoriginmetar":
+								echo $f->getOriginWeather("metar");
+								break;
+							case "getorigintaf":
+								echo $f->getOriginWeather("taf");
+								break;
+							case "getdestinationmetar":
+								echo $f->getDestinationWeather("metar");
+								break;
+							case "getdestinationtaf":
+								echo $f->getDestinationWeather("taf");
+								break;
+							default:
+								echo json_encode(["error" => -1]);
+								break;
+						}
+					}
+					else
+						echo $f->ToJSON();
+				}
+			}
+			die();
+		}
+
+		if ($type == "timeframes")
+		{
+			if ($action == "getall")
+				echo Timeframe::ToJsonAll();
+			elseif ($action == "create")
+				echo json_encode(["error" => Timeframe::Create($_POST)]);				
+			else
+			{
+				$t = Timeframe::Find($id);
+
+				if ($t == null)
+					echo json_encode(["error" => 404]);
+				else
+				{
+					if ($action)
+					{
+						switch ($action)
+						{
+							case "update":
+								echo json_encode(["error" => $t->Update($_POST)]);
+								break;
+							case "delete":
+								echo json_encode(["error" => $t->Delete()]);
+								break;
+							default:
+								echo json_encode(["error" => -1]);
+								break;
+						}
+					}
+					else
+						echo $t->toJsonSlots();
+				}
+			}
+			die();
+		}
+
+		if ($type == "slots")
+		{
+			if ($action == "create")
+				echo json_encode(["error" => Slot::Create($_POST)]);
+			else
+			{
+				$s = Slot::Find($id);
+				
+				if ($s == null)
+					echo json_encode(["error" => 404]);
+				else
+				{
+					if ($action)
+					{
+						switch ($action)
+						{
+							case "update":
+								echo json_encode(["error" => $s->Update($_POST)]);
+								break;
+							case "delete":
+								echo json_encode(["error" => $s->Delete()]);
+								break;
+							case "getoriginmetar":
+								echo $s->getOriginWeather("metar");
+								break;
+							case "getorigintaf":
+								echo $s->getOriginWeather("taf");
+								break;
+							case "getdestinationmetar":
+								echo $s->getDestinationWeather("metar");
+								break;
+							case "getdestinationtaf":
+								echo $s->getDestinationWeather("taf");
+								break;
+							default:
+								echo json_encode(["error" => -1]);
+								break;
+						}
+					}
+					else
+						echo $s->ToJson();
+				}
+			}
+			die();
+		}
+
+		if ($type == "users")
+		{
+			if (Session::LoggedIn() && Session::User()->permission > 1)
+			{
+				if ($action == "getall")
+					echo User::ToJsonAll(true);		
+				else
+				{
+					$u = User::FindId($id);
+
+					if ($u == null)
 						echo json_encode(["error" => 404]);
 					else
 					{
@@ -460,21 +360,149 @@ class Session
 							switch ($action)
 							{
 								case "update":
-									echo json_encode(["error" => $c->Update($_POST)]);
+									echo json_encode(["error" => $u->Update($_POST)]);
+									break;
+								case "delete":
+									echo json_encode(["error" => $u->Delete()]);
 									break;
 								default:
-									echo $c->ToJson();
+									echo json_encode(["error" => -1]);
 									break;
 							}
 						}
 						else
-							echo $c->ToJson();
+							echo $u->ToJSON(true, true);
 					}
 				}
+			}
+			else
+				echo json_encode(["error" => 403]);
+			die();
+		}
+
+		if ($type == "eventairports")
+		{
+			if ($action == "getflights")
+			{
+				$apt = EventAirport::FindId($id);
+				echo $apt->getFlights();
 				die();
 			}
+
+			if (Session::LoggedIn() && Session::User()->permission > 1)
+			{
+				if ($action == "getall")
+					echo EventAirport::ToJsonAll(true);
+				elseif ($action == "create")
+					echo json_encode(["error" => EventAirport::Create($_POST)]);
+				else
+				{
+					$apt = EventAirport::FindId($id);
+
+					if ($apt == null)
+						echo json_encode(["error" => 404]);
+					else
+					{
+						if ($action)
+						{
+							switch ($action)
+							{
+								case "update":
+									echo json_encode(["error" => $apt->Update($_POST)]);
+									break;
+								case "delete":
+									echo json_encode(["error" => $apt->Delete()]);
+									break;
+								default:
+									echo json_encode(["error" => -1]);
+									break;
+							}
+						}
+						else
+							echo $apt->ToJSON();
+					}
+				}
+			}
+			else
+				echo json_encode(["error" => 403]);
+			die();
+		}
+
+		if ($type == "profile")
+		{
+			// saving profile via profile page
+			if ($action == "update")
+				echo json_encode(["error" => Session::User()->UpdateProfile($_POST)]);
+			
+			// saving email only via modal window
+			if ($action == "updateEmail")
+				echo json_encode(["error" => Session::User()->UpdateEmail($_POST)]);
 
 			die();
 		}
+
+		if ($type == "email")
+		{
+			if ($action == "sendFlightConfirmations")
+				echo json_encode(["error" => Flight::ResendConfirmationEmails()]);
+			if ($action == "sendFreeText" && !empty($_POST))
+				echo json_encode(["error" => Email::SendFreeText($_POST)]);
+			die();
+		}
+
+		if ($type == "admin")
+		{
+			if ($action == "updateGeneral")
+				echo json_encode(["error" => Config::UpdateGeneral($_POST)]);
+			die();
+		}	
+
+		if ($type == "session")
+		{
+			if (Session::LoggedIn())
+				echo Session::User()->ToJson();
+			else
+				echo "null";
+			die();
+		}
+
+		if ($type == "contact")
+		{
+			if (!empty($_POST))
+				echo json_encode(["error" => Email::ContactForm($_POST)]);
+		}
+
+		if ($type == "contents")
+		{
+			if ($action == "getall")
+				echo Content::ToJsonAll();
+			else
+			{
+				$c = Content::Find($id);
+				
+				if ($c == null)
+					echo json_encode(["error" => 404]);
+				else
+				{
+					if ($action)
+					{
+						switch ($action)
+						{
+							case "update":
+								echo json_encode(["error" => $c->Update($_POST)]);
+								break;
+							default:
+								echo $c->ToJson();
+								break;
+						}
+					}
+					else
+						echo $c->ToJson();
+				}
+			}
+			die();
+		}
+
+		die();
 	}
 }

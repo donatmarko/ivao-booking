@@ -11,6 +11,5 @@ global $config;
 ?>
 
 <main class="container" role="page">
-	<h1>About <?=$config["event_name"]; ?></h1>
 	<?php include_once("contents/briefing.html"); ?>
 </main>

@@ -45,6 +45,8 @@ foreach ($flts as $flt)
 				<hr>
 				<a class="nav-link" id="tabNewFlightLink" data-toggle="pill" href="#tabNewFlight" role="tab">Add new flight</a>
 				<a class="nav-link" id="tabTimeframesLink" data-toggle="pill" href="#tabTimeframes" role="tab">Private slot management</a>
+				<a class="nav-link" id="tabReservedFlightsLink" data-toggle="pill" href="#tabReservedFlights" role="tab">List of reserved flights</a>
+				<hr>
 				<a class="nav-link" id="tabEmailLink" data-toggle="pill" href="#tabEmail" role="tab">Email</a>
 			</div>
 		</div> 
@@ -59,6 +61,13 @@ foreach ($flts as $flt)
 								<tr>
 									<th>Name of event</th>
 									<td><input class="form-control" id="txtEventName" type="text" placeholder="e.g. RFE Vatican" required value="<?=$config["event_name"]; ?>"></td>
+								</tr>
+								<tr>
+									<th>Division logo</th>
+									<td>
+										<input class="form-control" id="txtDivisionLogo" type="text" placeholder="e.g. img/logo.svg" value="<?=$config["division_logo"]; ?>">
+										<div class="text-muted"><small>Leave empty to display event name instead of the logo on the menu bar</small></div>
+									</td>
 								</tr>
 								<tr>
 									<th>Booking status</th>
@@ -158,7 +167,7 @@ foreach ($flts as $flt)
 												</div>											
 											</div>		
 										</div>
-										<div class="text-muted"><small>Leave empty if the division doesn't have either of them</small></div>
+										<div class="text-muted"><small>Leave empty if the division doesn't have any of them</small></div>
 									</td>
 								</tr>
 								<tr>
@@ -170,7 +179,28 @@ foreach ($flts as $flt)
 										<input class="form-control" id="txtWxUrl" type="text" value="<?=$config["wx_url"]; ?>">
 										<div class="text-muted"><small>To disable the weather request feature at the flight briefing, simply remove the URL above</small></div>
 									</td>
-								</tr>							
+								</tr>		
+								<tr>
+									<th>Discord Webhook URL</th>
+									<td>
+										<input class="form-control" id="txtDiscordWebhookUrl" type="text" value="<?=$config["discord_webhook_url"]; ?>">
+										<div class="text-muted"><small>To disable the weather request feature at the flight briefing, simply remove the URL above</small></div>
+									</td>
+								</tr>
+								<tr>
+									<th>Auto turnover detection</th>
+									<td>
+										<input type="checkbox" id="chkAutoTurnover" <?=$config["auto_turnover"] ? "checked" : ""; ?>><br>
+										<small class="text-muted">To disable Discord Webhook notifications, leave this field empty</small>
+									</td>
+								</tr>
+								<tr>
+									<th>Hide dates in flight lists</th>
+									<td>
+										<input type="checkbox" id="chkTimeOnlyInList" <?=$config["time_only_in_list"] ? "checked" : ""; ?>><br>
+										<small class="text-muted">Showing dates seems to be unnecessary for single-day events</small>
+									</td>
+								</tr>
 								<tr>
 									<th></th>
 									<td><button class="btn btn-success btn-lg" type="submit">Save settings</button></td>
@@ -380,6 +410,16 @@ foreach ($flts as $flt)
 									</div>
 								</div>
 								<div class="form-group row">
+									<label class="col-sm-2 col-form-label">Type:</label>
+									<div class="col-sm-10">
+										<select class="form-control" id="selTfNewType">
+											<option value="0">both</option>
+											<option value="1">arrival only</option>
+											<option value="2">departure only</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group row">
 									<label class="col-sm-2 col-form-label">Time (range):</label>
 									<div class="col-sm-10">
 										<div class="form-row">
@@ -452,6 +492,16 @@ foreach ($flts as $flt)
 									</div>
 								</div>
 								<div class="form-group row">
+									<label class="col-sm-2 col-form-label">Type:</label>
+									<div class="col-sm-10">
+										<select class="form-control" id="selTfEditType">
+											<option value="0">both</option>
+											<option value="1">arrival only</option>
+											<option value="2">departure only</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group row">
 									<label class="col-sm-2 col-form-label">
 										Available slots:
 										<small>in each hour</small>
@@ -471,7 +521,8 @@ foreach ($flts as $flt)
 							<thead>
 								<tr>
 									<th>Airport</th>
-									<th>Date & time</th>
+									<th>Date & Time</th>
+									<th>Type</th>
 									<th>Status</th>
 								</tr>
 							</thead>
@@ -481,6 +532,37 @@ foreach ($flts as $flt)
 					</div>
 
 					<?php include_once("inc/modal_slot.php"); ?>
+				</div>
+
+				<div class="tab-pane fade" id="tabReservedFlights" role="tabpanel">
+					<h2>Reserved flights</h2>
+
+					<table class="table table-hover table-sm table-striped">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Callsign</th>
+								<th>Origin</th>
+								<th>Destination</th>
+								<th>Off-blocks</th>
+								<th>On-blocks</th>
+								<th>Booked by</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php foreach (Flight::getBookedFlights() as $flt) : ?>
+								<tr>
+									<td><?=$flt->booked == 'granted' ? 'Private Slot' : 'Flight'; ?></td>
+									<td><?=$flt->callsign; ?></td>
+									<td><?=$flt->originIcao; ?></td>
+									<td><?=$flt->destinationIcao;?></td>
+									<td><?=!$flt->isDepartureEstimated ? $flt->departureTime : ''; ?></td>
+									<td><?=!$flt->isArrivalEstimated ? $flt->arrivalTime : ''; ?></td>
+									<td><?=$flt->bookedBy;?></td>
+								</tr>
+							<?php endforeach; ?>
+						</tbody>
+					</table>
 				</div>
 
 				<div class="tab-pane fade" id="tabEmail" role="tabpanel">
@@ -546,35 +628,35 @@ foreach ($flts as $flt)
 				<div class="tab-pane fade active show text-justify" id="tabAbout" role="tabpanel">
 					<h2>About the system</h2>
 					<p>This web application has been developed for the IVAO community since 2018. Not coincidentally, its influence stems from <a href="https://ivao.aero/Member.aspx?Id=205631" target="_blank">Filipe Fonseca</a>'s RFE system which is widely used on the network.</p>
-					<p>The system has been designed as a "universal" solution, not specifically tailored to one division. I've always strived to maintain the system's ease of use for both users and staff.</p>
+					<p>The system has been designed as a "universal" solution, not specifically tailored to one division. I have always strived to maintain the ease of use for both users and staff.</p>
 					<p>
 						The backend is PHP-based, utilizing object-oriented concepts to ensure the application is easily expandable and modifiable. Additionally, new features can be implemented with ease.<br>
 						The frontend design adheres to the <a href="https://brand.ivao.aero/" target="_blank">IVAO Brand Guidelines</a>, is responsive, mobile-first, and provides a comfortable user experience.
 					</p>
 
 					<div class="flightCollapses" id="collapses">
-						<button class="btn btn-light text-left btn-block collapsed" data-target="#credits" data-toggle="collapse">Credits (i.e. list of people who contributed)</button>
+						<button class="btn btn-light text-left btn-block collapsed" data-target="#credits" data-toggle="collapse">Credits</button>
 						<div class="text-center card card-body collapse" id="credits" data-parent="#collapses">
 							<p>
 								Developed by:<br>
-								<strong>Donat Marko</strong> (<a href="https://ivao.aero/Member.aspx?Id=540147" target="_blank">540147</a>)
+								<strong>Donát Markó</strong> (<a href="https://ivao.aero/Member.aspx?Id=540147" target="_blank">540147</a>)
+							</p>
+							<p>
+								Great ideas:<br>
+								<strong>Bence Nagy</strong> (<a href="https://ivao.aero/Member.aspx?Id=651087" target="_blank">651087</a>)<br>
+								<strong>Keve Kovács</strong> (<a href="https://ivao.aero/Member.aspx?Id=492790" target="_blank">492790</a>)
 							</p>
 							<p>
 								Contribution with IVAO OAuth API:<br>
 								<strong>Kanin Pornsinsiriruk</strong> (<a href="https://ivao.aero/Member.aspx?Id=512878" target="_blank">512878</a>)
 							</p>
 							<p>
-								Testing <small>(booking random flights and tolerating dozens of spams in their mailbox):</small><br>
-								<strong>Keve Kovacs</strong> (<a href="https://ivao.aero/Member.aspx?Id=492790" target="_blank">492790</a>)<br>
-								<strong>Philip Bölcskei</strong> (<a href="https://ivao.aero/Member.aspx?Id=527188" target="_blank">527188</a>)
+								Documentation:<br>
+								<strong>Aldo Benitez</strong> (<a href="https://ivao.aero/Member.aspx?Id=190881" target="_blank">190881</a>)
 							</p>
 							<p>
 								Background noise for coding:<br>
 								<a href="https://www.spotify.com" target="_blank"><strong>Spotify</strong></a>
-							</p>
-							<p>
-								Catering:<br>
-								<a href="https://www.nescafe.com/" target="_blank"><strong>Nescafé</strong></a>
 							</p>
 						</div>
 
@@ -587,8 +669,8 @@ foreach ($flts as $flt)
 								<li>email sending</li>
 								<li>automatic turnover flight detection</li>
 								<li>conflicting flight detection</li>
-								<li>GDPR compliance with the possibility to hide full name</li>
 								<li>free-text circular emails to various groups of people</li>
+								<li>Discord webhook notifications</li>
 							</ul>
 						</div>
 
@@ -606,7 +688,6 @@ foreach ($flts as $flt)
 								<li><a href="https://ckeditor.com/" target="_blank">CKEditor 4</a></li>
 								<li><a href="https://sweetalert2.github.io/" target="_blank">SweetAlert 2</a></li>
 								<li><a href="https://fontawesome.com/?from=io" target="_blank">Font Awesome</a></li>
-								<li><a href="https://github.com/donatmarko/my-smtp-api" target="_blank">My SMTP API by donatmarko</a></li>
 							</ul>
 						</div>
 					</div>

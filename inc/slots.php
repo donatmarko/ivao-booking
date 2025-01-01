@@ -11,11 +11,13 @@ global $config;
 
 function slotsTable($airport)
 {
+	global $config;
 	$result = '<div class="table-responsive">
 		<table class="table table-hover table-sm table-striped">
 			<thead>
 				<tr>
-					<th>Date & time</th>
+					<th class="text-center">Type</th>
+					<th class="text-center">Time</th>
 					<th>Booking</th>
 				</tr>
 			</thead>
@@ -31,7 +33,8 @@ function slotsTable($airport)
 		foreach ($timeframes as $tf)
 		{
 			$result .= '<tr>';
-			$result .= '	<td>' . getHumanDateTime($tf->time) . '</td>';
+			$result .= '	<td class="text-center">' . $tf->getType() . '</td>';
+			$result .= '	<td class="text-center">' . getHumanDateTime($tf->time, $config["time_only_in_list"]) . '</td>';
 
 			$stats = $tf->getStatistics();
 			if ($stats["free"] > 0)
@@ -108,7 +111,7 @@ if (count($apts) > 0)
 							<div class="form-group row">
 								<label class="col-sm-2 col-form-label">Callsign:</label>
 								<div class="col-sm-10">
-									<input class="form-control input-uppercase" id="txtSrCallsign" type="text" placeholder="ICAO callsign, e.g. AUA714C" required maxlength="10">											
+									<input class="form-control input-uppercase" id="txtSrCallsign" type="text" placeholder="ICAO callsign, e.g. HUN25K" required maxlength="10">											
 								</div>
 							</div>
 							<div class="form-group row">
@@ -129,12 +132,12 @@ if (count($apts) > 0)
 								<div class="col-sm-10">
 									<div class="form-row">									
 										<div class="col">
-											<input class="form-control input-uppercase" id="txtSrAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B738" required maxlength="4">
+											<input class="form-control input-uppercase" id="txtSrAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B77W" required maxlength="4">
 										</div>
 										<div class="col">
 											<div class="form-check" style="margin-top: 0.4rem">
 												<input class="form-check-input" type="checkbox" id="chkSrFreighter">
-												<label class="form-check-label" for="chkSrFreighter">freighter aircraft</label>
+												<label class="form-check-label" for="chkSrFreighter">cargo aircraft</label>
 											</div>
 										</div>										
 									</div>
@@ -143,7 +146,7 @@ if (count($apts) > 0)
 							<div class="form-group row">
 								<label class="col-sm-2 col-form-label">Route:</label>
 								<div class="col-sm-10">
-									<input class="form-control input-uppercase" type="text" id="txtSrRoute" required placeholder="e.g. ADAMA Z647 ANEXA">
+									<input class="form-control input-uppercase" type="text" id="txtSrRoute" required placeholder="e.g. GILEP ZOLKU SUNIS DETSA BAKOR M984 EVRIP">
 								</div>
 							</div>
 							
@@ -160,15 +163,16 @@ if (count($apts) > 0)
 		<div class="text-justify">
 			<h3>Instructions for private slot bookings</h3>
 
-			<p>If you want to participate in our event but haven't found a suitable flight, you have the opportunity to request a "private slot."</p>
+			<p>If you want to participate in our event but haven't found a suitable flight, you have the opportunity to request a private slot.</p>
 			<p>A private slot ensures that you can fly your specific flight at the specified timeframe, either as an arrival or departure from/to the respective airport.</p>
-			<p>Please note that without a booked private slot, the ATCs can choose <strong>not to accept</strong> handling your flight if there are no available slots.</p>
+			<p>Please note that without a booked private slot, the ATCs can choose <strong>not to accept</strong> handling your flight.</p>
+
+			<p>The available slots are scheduled at times when scheduled traffic is less intense, so we will have sufficient capacity to handle such custom flights.</p>
 
 			<p>You need a private slot for the following types of flight:</p>
 			<ul>
-				<li>VFR movements</li>
 				<li>Flights with business jets</li>
-				<li>Virtual airline and custom flights</li>
+				<li>Custom flights or flights connected to virtual airlines</li>
 			</ul>
 
 			<div class="bd-callout bd-callout-danger">
@@ -176,17 +180,17 @@ if (count($apts) > 0)
 				<p>Private slots are <strong>only</strong> for the non-advertised flights mentioned above</p>
 			</div>
 
-			<p>Requesting a slot does not guarantee immediate approval. Our Events staff will review and evaluate your request. If you have set your email address <a href="profile">on your profile,</a> you will receive an email about the result.</p>
+			<p>Requesting a slot does not guarantee immediate approval. Our Events Department will review and decide on your request. If you have set your email address <a href="profile">on your profile,</a> you will receive an email about the result.</p>
 
 			<p>To request a slot, click the button next to the desired timeframe. Please note that we may advertise more than one slot possibility for one timeframe. A <span class="badge badge-danger">red</span> button indicates that the slot is full, and no further requests can be sent.</p>
 
-			<p>If  you have any questions or issues, please contact the <?=$config["division_name"]; ?> Events staff through <a href="contact"><strong>our contact form</strong></a>.</p>
+			<p>If you have any questions or issues, please contact the <?=$config["division_name"]; ?> Events Department through <a href="contact"><strong>our contact form</strong></a>.</p>
 		</div>
 	</div>
 <?php
 }
 else
-	echo '<div class="alert alert-info">Currently, there are no airports participating in the event. Please check back regularly for updates.</div>';
+	echo '<div class="alert alert-info">Currently, no airports are participating in the event. Please check back regularly for updates.</div>';
 
 echo '</main>';
 

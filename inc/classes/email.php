@@ -22,7 +22,7 @@ class Email
 	 * @param string $message
 	 * @return int error code (check API doc)
 	 */
-	public static function SendSmtp($from, $tos, $ccs, $bccs, $subject, $message)
+	public static function Send($from, $tos, $ccs, $bccs, $subject, $message)
 	{
 		global $config;
 
@@ -32,15 +32,32 @@ class Email
 		$cfg_smtp = new PHPMailer\PHPMailer\PHPMailer(true);
 		try
 		{       
-			$cfg_smtp->SMTPDebug = 0;
-			$cfg_smtp->isSMTP();                    
-			$cfg_smtp->Host = $config["mail_smtp_server"];
-			$cfg_smtp->SMTPAuth = $config["mail_smtp_auth"];
-			$cfg_smtp->Username = $config["mail_smtp_username"];
-			$cfg_smtp->Password = $config["mail_smtp_password"];
-			$cfg_smtp->SMTPSecure = $config["mail_smtp_secure"];
-			$cfg_smtp->Port = $config["mail_smtp_port"];
 			$cfg_smtp->CharSet = "UTF-8";
+			$cfg_smtp->SMTPDebug = 0;
+
+			$cfg_smtp->SMTPOptions = [
+				'ssl' => [
+					'verify_peer' => false,
+					'verify_peer_name' => false,
+					'allow_self_signed' => true
+				]
+			];  
+
+			if ($config["mail_mode"] == "smtp")
+			{
+				$cfg_smtp->isSMTP();                    
+				$cfg_smtp->Host = $config["mail_smtp_server"];
+				$cfg_smtp->SMTPAuth = $config["mail_smtp_auth"];
+				$cfg_smtp->Username = $config["mail_smtp_username"];
+				$cfg_smtp->Password = $config["mail_smtp_password"];
+				$cfg_smtp->SMTPSecure = $config["mail_smtp_secure"];
+				$cfg_smtp->Port = $config["mail_smtp_port"];
+			}
+			
+			if ($config["mail_mode"] == "sendmail")
+			{
+				$cfg_smtp->isSendmail();
+			}
 
 			// set from
 			if (is_string($from))
@@ -50,30 +67,30 @@ class Email
 			else
 				$cfg_smtp->setFrom($from['email'], $from['name']);
 		
+			$cfg_smtp->addReplyTo($config["mail_replyto_email"], $config["mail_replyto_name"]);
+
 			// missing recipient
 			if ($tos == null)
 				return 1;
-			else
+
+			if (is_array($tos) && !isArrayAssociative($tos))
 			{
-				if (is_array($tos) && !isArrayAssociative($tos))
+				foreach($tos as $to)
 				{
-					foreach($tos as $to)
-					{
-						if (is_string($to))
-							$cfg_smtp->addAddress($to);
-						else if (!array_key_exists('name', $to))
-							$cfg_smtp->addAddress($to['email']);
-						else
-							$cfg_smtp->addAddress($to['email'], $to['name']);
-					}
+					if (is_string($to))
+						$cfg_smtp->addAddress($to);
+					else if (!array_key_exists('name', $to))
+						$cfg_smtp->addAddress($to['email']);
+					else
+						$cfg_smtp->addAddress($to['email'], $to['name']);
 				}
-				else if (is_string($tos))
-					$cfg_smtp->addAddress($tos);
-				else if (!array_key_exists('name', $tos))
-					$cfg_smtp->addAddress($tos['email']);
-				else
-					$cfg_smtp->addAddress($tos['email'], $tos['name']);
 			}
+			else if (is_string($tos))
+				$cfg_smtp->addAddress($tos);
+			else if (!array_key_exists('name', $tos))
+				$cfg_smtp->addAddress($tos['email']);
+			else
+				$cfg_smtp->addAddress($tos['email'], $tos['name']);
 
 			// adding Carbon Copy
 			if ($ccs != null)
@@ -129,7 +146,7 @@ class Email
 		}
 		catch (Exception $e)
 		{
-			// error in SMTP process
+			print($e->getMessage());
 			return 2;
 		}
 	}
@@ -142,48 +159,44 @@ class Email
 	public static function ContactForm($array)
 	{
 		global $config;
-
-		if (Session::LoggedIn())
-		{
-			$subject = "";
-			switch ($array["subject"])
-			{
-				case 1:
-					$subject = "General inquiries, questions";
-					break;
-				case 2:
-					$subject = "Bugreport";
-					break;
-				case 3:
-					$subject = "Incorrect flight data";
-					break;
-				case 4:
-					$subject = "Private slots";
-					break;
-				case 5:
-					$subject = "Event feedback";
-					break;
-			}
-
-			$subject = sprintf("[%s] %s %s", $config["event_name"], $subject, date("d/m/Y H:i"));
-			$user = Session::User();
-			$fullname = sprintf("%s %s", $user->firstname, $user->lastname);
-			$email = $user->email;
-			$message = sprintf("<p>%s</p>--<br>%s (%s)<br>Division: %s<br>%s", nl2br(htmlspecialchars($array["message"])), $fullname, $user->vid, $user->division, $email);
-
-			Email::SendSmtp(
-				["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-				["name" => $fullname, "email" => $email],
-				null,
-				$config["division_email"],
-				$subject,
-				$message
-			);
-			return 0;
-		}
-		else
+		if (!Session::LoggedIn())
 			return 403;
-		return -1;
+
+		$subject = "";
+		switch ($array["subject"])
+		{
+			case 1:
+				$subject = "General inquiries, questions";
+				break;
+			case 2:
+				$subject = "Bugreport";
+				break;
+			case 3:
+				$subject = "Incorrect flight data";
+				break;
+			case 4:
+				$subject = "Private slots";
+				break;
+			case 5:
+				$subject = "Event feedback";
+				break;
+		}
+
+		$subject = sprintf("[%s] %s %s", $config["event_name"], $subject, date("d/m/Y H:i"));
+		$user = Session::User();
+		$fullname = sprintf("%s %s", $user->firstname, $user->lastname);
+		$email = $user->email;
+		$message = sprintf("<p>%s</p>--<br>%s (%s)<br>Division: %s<br>%s", nl2br(htmlspecialchars($array["message"])), $fullname, $user->vid, $user->division, $email);
+
+		Email::Send(
+			["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
+			["name" => $fullname, "email" => $email],
+			null,
+			$config["division_email"],
+			$subject,
+			$message
+		);
+		return 0;
 	}
 
 	/**
@@ -197,24 +210,20 @@ class Email
 	public static function Prepare($message, $toName, $toEmail, $subject)
 	{
 		global $config;
-		if (Session::LoggedIn())
-		{
-			$subject = sprintf("[%s] %s", $config["event_name"], $subject);
-			$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
-
-			$result = Email::SendSmtp(["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
-				["name" => $toName, "email" => $toEmail],
-				null,
-				null,
-				$subject,
-				$message
-			);
-
-			return $result === 0;
-		}
-		else
+		if (!Session::LoggedIn())
 			return 403;
-		return -1;
+
+		$subject = sprintf("[%s] %s", $config["event_name"], $subject);
+		$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
+
+		$result = Email::Send(["name" => $config["mail_from_name"], "email" => $config["mail_from_email"]],
+			["name" => $toName, "email" => $toEmail],
+			null,
+			null,
+			$subject,
+			$message
+		);
+		return $result === 0;
 	}
 
 	/**
@@ -250,90 +259,84 @@ class Email
 		$subject = $array["subject"];
 		$message = $array["message"];
 
-		if ($sesUser && $sesUser->permission > 1)
+		if (!$sesUser || $sesUser->permission < 2)
+			return 403;
+
+		$toEmails = [];
+
+		// all members with at least one flight/slot
+		if ($recipientsCode == 1)
 		{
-			// all members with at least one flight/slot
-			if ($recipientsCode == 1)
-			{
-				$toEmails = [];
-				foreach (Flight::GetAll() as $flt)
-				{					
-					$user = User::Find($flt->bookedBy);
-					if ($user && !empty($user->email))
-						$toEmails[] = $user->email;
-				}
-				foreach (Slot::GetAll() as $flt)
-				{
-					$user = User::Find($flt->bookedBy);
-					if ($user && !empty($user->email))
-						$toEmails[] = $user->email;
-				}
+			foreach (Flight::GetAll() as $flt)
+			{					
+				$user = User::Find($flt->bookedBy);
+				if ($user && !empty($user->email))
+					$toEmails[] = $user->email;
 			}
-
-			// members with at least one flight
-			if ($recipientsCode == 2)
+			foreach (Slot::GetAll() as $flt)
 			{
-				$toEmails = [];
-				foreach (Flight::GetAll() as $flt)
-				{
-					$user = User::Find($flt->bookedBy);
-					if ($user && !empty($user->email))
-						$toEmails[] = $user->email;
-				}
-			}
-
-			// members with at least one unconfirmed (prebooked) flight
-			if ($recipientsCode == 3)
-			{
-				$toEmails = [];
-				foreach (Flight::GetAll() as $flt)
-				{
-					if ($flt->booked == "prebooked")
-					{
-						$user = User::Find($flt->bookedBy);
-						if ($user && !empty($user->email))
-							$toEmails[] = $user->email;
-					}
-				}
-			}
-
-			// members with at least one slot
-			if ($recipientsCode == 4)
-			{
-				$toEmails = [];
-				foreach (Slot::GetAll() as $flt)
-				{
-					$user = User::Find($flt->bookedBy);
-					if ($user && !empty($user->email))
-						$toEmails[] = $user->email;
-				}
-			}
-
-			// only sending the email if the code is valid :)
-			if ($recipientsCode >= 1 && $recipientsCode <= 4)
-			{
-				$toEmails = array_values(array_unique($toEmails));
-
-				$subject = sprintf("[%s] %s", $config["event_name"], $subject);
-				$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
-				$result = false;
-			
-				$result = Email::SendSmtp(
-					["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
-					$config["division_email"],
-					null,
-					$toEmails,
-					$subject,
-					$message
-				);
-
-				if ($result === 0)
-					return 0;
+				$user = User::Find($flt->bookedBy);
+				if ($user && !empty($user->email))
+					$toEmails[] = $user->email;
 			}
 		}
-		else
-			return 403;
-		return -1;
+
+		// members with at least one flight
+		if ($recipientsCode == 2)
+		{
+			foreach (Flight::GetAll() as $flt)
+			{
+				$user = User::Find($flt->bookedBy);
+				if ($user && !empty($user->email))
+					$toEmails[] = $user->email;
+			}
+		}
+
+		// members with at least one unconfirmed (prebooked) flight
+		if ($recipientsCode == 3)
+		{
+			foreach (Flight::GetAll() as $flt)
+			{
+				if ($flt->booked == "prebooked")
+				{
+					$user = User::Find($flt->bookedBy);
+					if ($user && !empty($user->email))
+						$toEmails[] = $user->email;
+				}
+			}
+		}
+
+		// members with at least one slot
+		if ($recipientsCode == 4)
+		{
+			foreach (Slot::GetAll() as $flt)
+			{
+				$user = User::Find($flt->bookedBy);
+				if ($user && !empty($user->email))
+					$toEmails[] = $user->email;
+			}
+		}
+
+		// only sending the email if the code is valid :)
+		if ($recipientsCode >= 1 && $recipientsCode <= 4)
+		{
+			$toEmails = array_values(array_unique($toEmails));
+
+			$subject = sprintf("[%s] %s", $config["event_name"], $subject);
+			$message = Email::ReplaceGlobalVars($message) . Email::getSignature();
+			$result = false;
+		
+			$result = Email::Send(
+				["name" => sprintf("%s %s", $sesUser->firstname, $sesUser->lastname), "email" => $config["mail_from_email"]],
+				$config["division_email"],
+				null,
+				$toEmails,
+				$subject,
+				$message
+			);
+
+			return $result === 0;
+		}
 	}
 
 	/**
@@ -344,8 +347,8 @@ class Email
 	{
 		global $config;		
 		return sprintf('<p>--<br>
-			This email has been sent automatically, please do not reply! Should you have any questions, use <a href="%s/contact">our contact form</a> in the booking system.<br>
-			To opt-out from receiving such emails, we kindly invite you to remove your email address on your profile.</p>',
+			This email has been sent automatically. For questions use our <a href="%s/contact">contact form</a> in the booking system.<br>
+			To unsubscribe, you can edit your email settings on your profile.</p>',
 			SITE_URL
 		);
 	}

@@ -49,18 +49,39 @@ function scroll(elem)
     return true;
 }
 
-function getWx(elem, uri)
+function getWx(flight_or_slot, flight_id, action)
 {
+	const actions = [
+		"getoriginmetar",
+		"getorigintaf",
+		"getdestinationmetar",
+		"getdestinationtaf",
+	];
+
+	let elem = null;
+	let type = null;
+	if (flight_or_slot == 0) {
+		elem = $("#fltWxResult");
+		type = "flights";
+	} else if (flight_or_slot == 1) {
+		elem = $("#slotWxResult");
+		type = "slots";
+	}
+
 	$.ajax({
-		url: uri,
+		cache: false,
+		type: "POST",
+		url: "json",
+		data: { "type": type, "id": flight_id, "action": actions[action] },
 		success: function(data) {
-			if (data)
-				$(elem).html(data);
-			else
+			if (data?.result) {
+				$(elem).html(data.result);
+			} else {
 				$(elem).html("(no data available)");
+			}
 			$(elem).show();
-		},
-	});	
+		}
+	});
 } 
 
 const toast = swal.mixin({

@@ -15,10 +15,10 @@
 		<div class="col-sm-10">
 			<div class="form-row">									
 				<div class="col">
-					<input class="form-control input-uppercase" id="txtFltCallsign" type="text" placeholder="ICAO callsign, e.g. AUA714C" required maxlength="10">											
+					<input class="form-control input-uppercase" id="txtFltCallsign" type="text" placeholder="ICAO callsign, e.g. HUN25K" required maxlength="10">											
 				</div>
 				<div class="col">
-					<input class="form-control input-uppercase" id="txtFltFlightNumber" type="text" placeholder="IATA flight number, e.g. OS714" maxlength="10">
+					<input class="form-control input-uppercase" id="txtFltFlightNumber" type="text" placeholder="IATA flight number, e.g. HU1120" maxlength="10">
 				</div>										
 			</div>
 		</div>
@@ -72,12 +72,12 @@
 		<div class="col-sm-10">
 			<div class="form-row">									
 				<div class="col">
-					<input class="form-control input-uppercase" id="txtFltAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B738" required maxlength="4">
+					<input class="form-control input-uppercase" id="txtFltAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B77W" required maxlength="4">
 				</div>
 				<div class="col">
 					<div class="form-check" style="margin-top: 0.4rem">
 						<input class="form-check-input" type="checkbox" id="chkFltFreighter">
-						<label class="form-check-label" for="chkFltFreighter">freighter aircraft</label>
+						<label class="form-check-label" for="chkFltFreighter">cargo aircraft</label>
 					</div>
 				</div>										
 			</div>
@@ -88,10 +88,10 @@
 		<div class="col-sm-10">
 			<div class="form-row">									
 				<div class="col">
-					<input class="form-control input-uppercase" id="txtFltTerminal" type="text" placeholder="Terminal" maxlength="4">
+					<input class="form-control" id="txtFltTerminal" type="text" placeholder="Terminal" maxlength="10">
 				</div>
 				<div class="col">
-					<input class="form-control input-uppercase" id="txtFltGate" type="text" placeholder="Gate number" maxlength="4">
+					<input class="form-control" id="txtFltGate" type="text" placeholder="Gate/stand number" maxlength="10">
 				</div>										
 			</div>
 		</div>
@@ -99,7 +99,7 @@
 	<div class="form-group row">
 		<label class="col-sm-2 col-form-label">Route:</label>
 		<div class="col-sm-10">
-			<input class="form-control input-uppercase" type="text" id="txtFltRoute">
+			<input class="form-control input-uppercase" type="text" id="txtFltRoute" placeholder="e.g. GILEP ZOLKU SUNIS DETSA BAKOR M984 EVRIP">
 		</div>
 	</div>
 	<div class="form-group row">
@@ -109,7 +109,7 @@
 				<div class="col">
 					<select class="form-control" id="selFltStatus">
 						<option value="0">free</option>
-						<option value="1">prebooked</option>
+						<option value="1">reserved</option>
 						<option value="2">booked (confirmed)</option>
 					</select>
 				</div>

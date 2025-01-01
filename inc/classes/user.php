@@ -12,6 +12,34 @@
  */
 class User
 {
+	const RATINGS_ATC = [
+		"None",
+		"AS0",
+		"AS1",
+		"AS2",
+		"AS3",
+		"ADC",
+		"APC",
+		"ACC",
+		"SEC",
+		"SAI",
+		"CAI",
+	];
+
+	const RATINGS_PILOT = [
+		"None",
+		"FS0",
+		"FS1",
+		"FS2",
+		"FS3",
+		"PP",
+		"SPP",
+		"CP",
+		"ATP",
+		"SFI",
+		"CFI",
+	];
+
 	/**
 	 * Returns a user found in the database based on its VID, otherwise returns null
 	 * @param string $vid
@@ -69,19 +97,21 @@ class User
 	public static function IVAORegister($data)
 	{
 		global $db;
-		return $db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, email, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, NOW(), §)",
+		$db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, email, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, NOW(), §)",
 			1,
 			$data->vid,
 			$data->firstname,
 			$data->lastname,
 			$data->ratingatc,
 			$data->ratingpilot,
-			"",
+			$data->email ?? '',
 			$data->division,
 			$data->country,
 			$data->staff,
 			true
 		);
+		$user = self::FindId($db->GetInsertID());
+		discord_user_message("New user registered", 15871, $user);
 	}
 	
 	/**
@@ -99,7 +129,7 @@ class User
 			$db->Query("UPDATE users SET permission = 2 WHERE vid = §", $data->vid);
 		}
 
-		return $db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, last_login = NOW() WHERE vid = §",
+		$db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, last_login = NOW() WHERE vid = §",
 			$data->firstname,
 			$data->lastname,
 			$data->ratingatc,
@@ -110,6 +140,7 @@ class User
 			$data->vid
 		);
 
+		// discord_user_message("User logged in", 44543, $data);
 	}
 
 	/**
@@ -180,11 +211,26 @@ class User
 		// if ($div == "XU") $div = "GB";
 		// if ($div == "XZ") $div = "ZA";
 
-		$imgUrl = sprintf("img/flags/%s/%s.png", $size, $div);
-		if (!file_exists($imgUrl))
+		$imgUrl = null;
+
+		$files = [
+			sprintf("img/flags/%s/%s.png", $size, strtolower($div)),
+			sprintf("img/flags/%s/%s.png", $size, $div),
+		];
+
+		foreach ($files as $file) 
+		{
+			if (!file_exists($file))
+				continue;
+
+			$imgUrl = $file;
+			break;
+		}
+
+		if (!$imgUrl)
 			$imgUrl = sprintf("https://www.ivao.aero/data/images/badge/%s.gif", $div);
 		
-		return sprintf('<img data-toggle="tooltip" title="%s" src="%s" alt="%s" title="%s" class="img-fluid">', $this->division, $imgUrl, $this->division, $this->division);
+		return sprintf('<img data-toggle="tooltip" title="%s" src="%s" alt="%s" title="%s" class="img-fluid flag-%s">', $this->division, $imgUrl, $this->division, $this->division, $size);
 	}
 	
 	/**

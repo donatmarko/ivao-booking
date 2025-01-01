@@ -9,10 +9,16 @@ function getTimeframe(id)
 			$("#slotIcao").val(data.airportIcao);
 			$("#timeframeId").val(data.id);
 
+			const fromTo = [
+				" from/to ",
+				" to ",
+				" from "
+			];
+
 			if (data.eventAirport && data.eventAirport.airport)
-				$("#timeframeTitle").html("Private slots at " + data.timeHuman + " @ " + data.eventAirport.airport.countryFlag24 + data.eventAirport.icao);
+				$("#timeframeTitle").html("Private slots at " + data.timeHuman + fromTo[data.type] + data.eventAirport.airport.countryFlag24 + data.eventAirport.icao);
 			else
-				$("#timeframeTitle").html("Private slots at " + data.timeHuman + " @ " + data.aircraftIcao);
+				$("#timeframeTitle").html("Private slots at " + data.timeHuman + fromTo[data.type] + data.aircraftIcao);
 
 			var tbl = "";
 			var haveBooking = false;
@@ -24,11 +30,11 @@ function getTimeframe(id)
 					tbl += '<tr>';
 
 					if (airline = row.airline)
-						tbl += '<td data-toggle="tooltip" title="' + airline.name  + '">' + airline.logoSmall + row.callsign + '</td>';
+						tbl += '<td>' + airline.logoSmall + row.callsign + '</td>';
 					else
 						tbl += '<td>' + row.callsign + '</td>';
 
-					tbl += '<td data-toggle="tooltip" title="' + (row.aircraftName ? row.aircraftName : "") + '">' + row.aircraftIcao + (row.aircraftFreighter ? "/F" : "") + '</td>';
+					tbl += '<td data-toggle="tooltip" title="' + (row.aircraftName ? row.aircraftName : "") + '">' + row.aircraftIcao + (row.aircraftFreighter ? " cargo" : "") + '</td>';
 
 					if (orig = row.originAirport)
 						tbl += '<td>' + orig.countryFlag24 + '<span data-toggle="tooltip" title="' + orig.name + '">' + orig.icao + '</span></td>';
@@ -71,6 +77,17 @@ function getTimeframe(id)
 
 					$("#timeframeStatus").prop("class", "alert alert-success");
 					$("#slotRequest").show();
+
+					if (data.type == 2) {
+						$("#txtSrOriginIcao").val("LHBP").prop("disabled", true);
+						$("#txtSrDestinationIcao").val("").prop("disabled", false);
+					} else if (data.type == 1) {
+						$("#txtSrOriginIcao").val("").prop("disabled", false);
+						$("#txtSrDestinationIcao").val("LHBP").prop("disabled", true);
+					} else {
+						$("#txtSrOriginIcao").val("").prop("disabled", false);
+						$("#txtSrDestinationIcao").val("").prop("disabled", false);
+					}
 				}
 				else
 				{
@@ -155,7 +172,9 @@ function getSlot(id)
 			L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png', {
 				maxZoom: 18,
  				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-			}).addTo(map);		
+			}).addTo(map);	
+			
+			$("#slotMap").collapse("hide");
 			$("#slotMap").on('shown.bs.collapse', function(e){ map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
 			$("#slot").on('shown.bs.modal', function(e){ map.invalidateSize(true); map.fitBounds(polyline.getBounds()); });
 
@@ -241,9 +260,9 @@ function getSlot(id)
 						var content = "";
 						$.each(tfData, function() {
 							if (this.eventAirport)
-								content += '<option value="' + this.id + '">' + this.airportIcao + ' (' + this.eventAirport.name + ') - ' + this.timeHuman + '</option>';
+								content += `<option value="${this.id}">'${this.airportIcao} (${this.eventAirport.name}) | ${this.timeHuman} | ${this.typeHuman}</option>`;
 							else
-								content += '<option value="' + this.id + '">' + this.airportIcao + ' - ' + this.timeHuman + '</option>';
+								content += `<option value="${this.id}">'${this.airportIcao} | ${this.timeHuman} | ${this.typeHuman}</option>`;
 						});
 						$("#selSlotTimeframe").html(content);
 						$("#selSlotTimeframe").val(data.timeframeId);
@@ -307,15 +326,20 @@ function getSlot(id)
 			if (data.sessionUser && ((data.bookedByUser && data.bookedByUser.vid == data.sessionUser.vid) || (data.sessionUser.permission >= 2)))
 			{
 				$("#btnSlotBriefing").show();
-				$("#slotMetarOrigin").html("METAR " + data.originIcao)
-					.attr("onclick", "getWx('#slotWxResult', '" + data.wxUrl + "?icao=" + data.originIcao + "&type=metar')");
-				$("#slotTafOrigin").html("TAF " + data.originIcao)
-					.attr("onclick", "getWx('#slotWxResult', '" + data.wxUrl + "?icao=" + data.originIcao + "&type=taf')");
-				$("#slotMetarDestination").html("METAR " + data.destinationIcao)
-					.attr("onclick", "getWx('#slotWxResult', '" + data.wxUrl + "?icao=" + data.destinationIcao + "&type=metar')");
-				$("#slotTafDestination").html("TAF " + data.destinationIcao)
-					.attr("onclick", "getWx('#slotWxResult', '" + data.wxUrl + "?icao=" + data.destinationIcao + "&type=taf')");
-				$("#lnkSlotIvaoRte").prop("href", "https://www.ivao.aero/db/route/route.asp?start=" + data.originIcao + "&end=" + data.destinationIcao);
+				$("#slotMetarOrigin").html(`METAR ${data.originIcao}`)
+					.attr("onclick", `getWx(1, ${data?.id}, 0)`)
+					.show();
+				$("#slotTafOrigin").html(`TAF ${data.originIcao}`)
+					.attr("onclick", `getWx(1, ${data?.id}, 1)`)
+					.show();
+				$("#slotMetarDestination").html(`METAR ${data.destinationIcao}`)
+					.attr("onclick", `getWx(1, ${data?.id}, 2)`)
+					.show();
+				$("#slotTafDestination").html(`TAF ${data.destinationIcao}`)
+					.attr("onclick", `getWx(1, ${data?.id}, 3)`)
+					.show();
+				$("#slotSimbrief").html("Generate OFP via SimBrief")
+					.attr("href", data.simbriefLink);
 			}
 			else
 				$("#btnSlotBriefing").hide();

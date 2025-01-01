@@ -44,8 +44,8 @@ async function editFlight() {
 	const destination_icao = $("#txtFltDestinationIcao").val().toUpperCase();
 	const aircraft_icao = $("#txtFltAircraftIcao").val().toUpperCase();
 	const aircraft_freighter = $("#chkFltFreighter").is(":checked");
-	const terminal = $("#txtFltTerminal").val().toUpperCase();
-	const gate = $("#txtFltGate").val().toUpperCase();
+	const terminal = $("#txtFltTerminal").val();
+	const gate = $("#txtFltGate").val();
 	const route = $("#txtFltRoute").val().toUpperCase();
 	const booked = $("#selFltStatus").val();
 	const booked_by = Number($("#numFltBookedBy").val());

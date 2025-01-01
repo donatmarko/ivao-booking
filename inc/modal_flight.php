@@ -56,19 +56,19 @@ global $config;
 								<div id="fltAircraftHuman" class="foot text-center"></div>
 							</div>
 							<div class="col-lg-4">
-								<div class="head">Departure time</div>
+								<div class="head">Off-Block Time</div>
 								<div id="fltDepartureTimeHuman" class="big text-center"></div>
 								<div id="fltDepartureTimeAuto" class="foot text-center"><span class="badge badge-danger">Automatically calculated</span></div>
 							</div>
 							<div class="col-lg-4">
-								<div class="head">Arrival time</div>
+								<div class="head">On-Block Time</div>
 								<div id="fltArrivalTimeHuman" class="big text-center"></div>
 								<div id="fltArrivalTimeAuto" class="foot text-center"><span class="badge badge-danger">Automatically calculated</span></div>
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-lg-4">
-								<div class="head">Position</div>
+								<div class="head">Parking</div>
 								<div id="fltPosition" class="big text-center"></div>
 							</div>
 							<div class="col-lg-8">
@@ -79,13 +79,7 @@ global $config;
 					</div>
 
 					<div class="flightCollapses" id="flightCollapses">
-						<button class="btn btn-block btn-light collapsed" data-target="#fltMap" data-toggle="collapse">Show route on map</button>
-						<div class="collapse card card-body" id="fltMap" data-parent="#flightCollapses"><div class="map" id="uiFltMap"></div></div>
-
-						<button class="btn btn-block btn-light collapsed" data-target="#fltTurnovers" data-toggle="collapse" id="btnFltTurnovers">Turnover flight(s)</button>
-						<div class="collapse card card-body" id="fltTurnovers" data-parent="#flightCollapses"></div>
-
-						<button id="btnFltBriefing" class="btn btn-block btn-light collapsed" data-target="#fltBriefing" data-toggle="collapse">Flight briefing (weather, flight planning)</button>
+						<button id="btnFltBriefing" class="btn btn-block btn-light collapsed" data-target="#fltBriefing" data-toggle="collapse">Flight briefing</button>
 						<div class="collapse card card-body" id="fltBriefing" data-parent="#flightCollapses">
 <?php if (!empty($config["wx_url"])) : ?>
 							<p>
@@ -97,16 +91,22 @@ global $config;
 							<div id="fltWxResult" class="card card-body wxResult"></div>
 <?php endif; ?>
 							<p>
-								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm">SimBrief</a>
-								<a href="http://rfinder.asalink.net/free" target="_blank" class="btn btn-secondary btn-sm">RouteFinder</a>
+								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm" id="fltSimbrief">SimBrief</a>
 							</p>
+							<div id="fltBriefingText"></div>
 						</div>
+
+						<button class="btn btn-block btn-light collapsed" data-target="#fltTurnovers" data-toggle="collapse" id="btnFltTurnovers">Turnover flight(s)</button>
+						<div class="collapse card card-body" id="fltTurnovers" data-parent="#flightCollapses"></div>
+
+						<button class="btn btn-block btn-light collapsed" data-target="#fltMap" data-toggle="collapse">Show route on map</button>
+						<div class="collapse card card-body" id="fltMap" data-parent="#flightCollapses"><div class="map" id="uiFltMap"></div></div>
 					</div>
 
 					<div class="flighttiles" id="fltBookedBy">
 						<div class="row">
 							<div class="col-lg-6">
-								<div class="head">Flight already booked by</div>
+								<div class="head">Reserved by</div>
 								<div id="fltBookedByName" class="big"></div>
 							</div>
 							<div class="col-lg-3">
@@ -124,7 +124,7 @@ global $config;
 								<div id="fltBookedByRating" class="pt-2"></div>
 							</div>
 							<div class="col-lg-6">
-								<div class="head">Flight has been booked at</div>
+								<div class="head">Reserved at</div>
 								<div id="fltBookedAt" class="big"></div>
 							</div>
 						</div>
@@ -136,13 +136,13 @@ global $config;
 					<a class="btn btn-primary" href="login">Click here to log in</a>
 				</div>
 				<div id="fltBtnsDefault" style="display: none">
-					<button type="button" class="btn btn-success" id="btnFltBook">Book this flight now!</button>
-					<button type="button" class="btn btn-danger" id="btnFltFree">Delete booking</button>
+					<button type="button" class="btn btn-success" id="btnFltBook">Reserve this flight now!</button>
+					<button type="button" class="btn btn-danger" id="btnFltFree">Delete reservation</button>
 					<button type="button" class="btn btn-primary" id="btnFltSendEmail">Re-send confirmation mail</button>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 				</div>
 				<div id="fltBtnsConfirm" style="display: none">
-					<button type="button" class="btn btn-primary" id="btnFltConfirm">I agree, book the flight</button>
+					<button type="button" class="btn btn-primary" id="btnFltConfirm">I agree, reserve the flight</button>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">I don't agree</button>	
 				</div>
 			</div>

@@ -122,10 +122,9 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         header('Location: ' . $redirect_uri); // Try to login again
     }
 
-    $staffPosition = '';
-    foreach ($user_res_data['userStaffPositions'] as $key => $value) {
-        if ($key > 0) $staffPosition .= ':';
-        $staffPosition .= $value['id'];
+    $staffPositions = [];
+    foreach ($user_res_data['userStaffPositions'] as $staffPosition) {
+        $staffPositions[] = $staffPosition['id'];
     }
 
     $_SESSION["LOGIN"] = (object)[
@@ -136,7 +135,8 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
         'ratingpilot' => $user_res_data['rating']['pilotRating']['id'],
         'division' => $user_res_data['divisionId'],
         'country' => $user_res_data['countryId'],
-        'staff' => $staffPosition,
+        'staff' => implode(':', $staffPositions),
+        'email' => isset($user_res_data['userStaffDetails']) ? $user_res_data['userStaffDetails']['email'].'@ivao.aero' : '', 
     ];
     header('Location: ' . SITE_URL . '/login');
 } else {

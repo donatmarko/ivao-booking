@@ -19,12 +19,10 @@ class Airline
 	 */
 	public static function Find($icao)
 	{
-		global $dbNav;
-		if ($query = $dbNav->Query("SELECT * FROM airlines WHERE icao = §", $icao))
-		{
-			if ($row = $query->fetch_assoc())
-				return new Airline($row);
-		}
+		global $db;
+		$query = $db->Query("SELECT * FROM nav_airlines WHERE icao = §", $icao);
+		if ($row = $query->fetch_assoc())
+			return new Airline($row);
 		return null;
 	}
 	
@@ -40,24 +38,22 @@ class Airline
 	 * Returns the logo (HTML img) of the airline if file exists.
 	 * @return string HTML
 	 */
-	public function getLogo()
+	public function getLogo($small = false)
 	{
-		$imgUrl = sprintf("img/airlines/%s.gif", $this->icao);
-		if (file_exists($imgUrl))
-			return sprintf('<img src="%s" alt="%s" class="img-fluid"> ', $imgUrl, $this->icao);
-		return "";
-	}
-	
-	/**
-	 * Returns the logo (HTML img) in smaller version of the airline if file exists.
-	 * @return string HTML
-	 */
-	public function getLogoSmall()
-	{
-		$imgUrl = sprintf("img/airlines/%s.gif", $this->icao);
-		if (file_exists($imgUrl))
-			return sprintf('<img src="%s" alt="%s" class="img-fluid" style="width: 40%%"> ', $imgUrl, $this->icao);
-		return "";
+		$files = [
+			sprintf("img/airlines/%s.png", $this->icao),
+			sprintf("img/airlines/%s.gif", $this->icao)
+		];
+
+		$small_size = $small ? ' style="width: 40%"' : '';
+
+		foreach ($files as $file)
+		{
+			if (!file_exists($file))
+				continue;
+
+			return sprintf('<img data-toggle="tooltip" title="%s" src="%s" alt="%s" class="img-fluid airline-logo"%s> ', $this->callsign, $file, $this->icao, $small_size);
+		}
 	}
 	
 	/**
@@ -71,8 +67,8 @@ class Airline
 		
 		// adding data from functions to the feed
 		$data = [
-			"logo" => $this->getLogo(),
-			"logoSmall" => $this->getLogoSmall(),
+			"logo" => $this->getLogo(false),
+			"logoSmall" => $this->getLogo(true),
 		];
 		
 		return json_encode(array_merge($apt, $data));

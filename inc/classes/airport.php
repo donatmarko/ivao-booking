@@ -19,25 +19,23 @@ class Airport
 	 */
 	public static function Find($icao)
 	{
-		global $dbNav;
-		if ($query = $dbNav->Query("SELECT * FROM airports WHERE icao = §", $icao))
-		{
-			if ($row = $query->fetch_assoc())
-				return new Airport($row);
-		}
+		global $db;
+		$query = $db->Query("SELECT * FROM nav_airports WHERE ident = §", $icao);
+		if ($row = $query->fetch_assoc())
+			return new Airport($row);
 		return null;
 	}
 	
 	public $icao, $iata, $country, $latitude, $longitude, $name, $elevation, $type;
 	public function __construct($row)
 	{
-		$this->icao = $row["icao"];
-		$this->iata = $row["iata"];
-		$this->country = $row["country"];
-		$this->latitude = (float)$row["latitude"];
-		$this->longitude = (float)$row["longitude"];
+		$this->icao = $row["ident"];
+		$this->iata = $row["iata_code"];
+		$this->country = $row["iso_country"];
+		$this->latitude = (float)$row["latitude_deg"];
+		$this->longitude = (float)$row["longitude_deg"];
 		$this->name = $row["name"];
-		$this->elevation = (int)$row["elevation"];
+		$this->elevation = (int)$row["elevation_ft"];
 		$this->type = $row["type"];
 		
 		$this->name = str_replace("International Airport", "", $this->name);
@@ -54,36 +52,41 @@ class Airport
 	 */
 	public function getCountryFlag($size = 32)
 	{
-		$imgUrl = sprintf("img/flags/%s/%s.png", $size, $this->country);
+		$files = [
+			sprintf("img/flags/%s/%s.png", $size, strtolower($this->country)),
+			sprintf("img/flags/%s/%s.png", $size, $this->country),
+			sprintf("img/flags/%s/_unknown.png", $size),
+		];
 
-		if (!file_exists($imgUrl))
-			$imgUrl = sprintf("img/flags/%s/_unknown.png", $size);
+		foreach ($files as $file) 
+		{
+			if (!file_exists($file))
+				continue;
 			
-		return sprintf('<img src="%s" alt="%s" data-toggle="tooltip" title="Country: %s" class="img-fluid"> ', $imgUrl, $this->country, $this->country);
+			return sprintf('<img src="%s" alt="%s" data-toggle="tooltip" title="%s" class="img-fluid flag-%s"> ', $file, $this->country, $this->country, $size);
+		}
 	}
 
 	/**
-	 * Returns the METAR of the airport.
-	 * Not used
-	 * @return string METAR
+	 * Returns the METAR/TAF of the airport.
+	 * @return null|string 
 	 */
-	public function getMetar()
+	public function getWeather(string $type)
 	{
 		global $config;
-		return file_get_contents(sprintf('%s?type=metar&icao=%s', $config["wx_url"], $this->icao));
+
+		if (empty($config["wx_url"]))
+			return null;
+		
+		$url = strtr($config["wx_url"], [
+			"{type}" => $type,
+			"{icao}" => $this->icao,
+		]);
+
+		$result = str_replace("\n", "<br>", file_get_contents($url));
+		return json_encode(["result" => $result]);
 	}
 
-	/**
-	 * Returns the TAF of the airport.
-	 * Not used
-	 * @return string TAF
-	 */
-	public function getTaf()
-	{
-		global $config;
-		return file_get_contents(sprintf('%s?type=taf&icao=%s', $config["wx_url"], $this->icao));
-	}
-	
 	/**
 	 * Converts the object fields to JSON, also adds the additional data from functions
 	 * METAR and TAF fields are not used because of the high performance load!
@@ -98,8 +101,6 @@ class Airport
 			"countryFlag24" => $this->getCountryFlag(24),
 			"countryFlag32" => $this->getCountryFlag(32),
 			"countryFlag48" => $this->getCountryFlag(48),
-			/*"metar" => $this->getMetar(),
-			"taf" => $this->getTaf(),*/
 		];
 		
 		return json_encode(array_merge($apt, $data));

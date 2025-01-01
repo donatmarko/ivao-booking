@@ -14,6 +14,8 @@
  */
 function flightsTable($airport, $type)
 {
+	global $config;
+
 	if ($type == "departures")		
 	{
 		$flights = $airport->getDepartures();
@@ -28,77 +30,86 @@ function flightsTable($airport, $type)
 	$result .= '<table class="table table-hover table-striped tblFlights" id="tblFlight_' . $airport->icao . '_' . $type . '">
 				<thead>
 				<tr>
-					<th></th>
+					<th>Airline</th>
 					<th>Flight</th>
 					<th>Aircraft</th>';
 					
 	if ($type == "arrivals")
 	{
 		$result .= '<th>Origin</th>';
-		$result .= '<th>Arrival</th>';
+		$result .= '<th>On-block</th>';
 	}
 	elseif ($type == "departures")
 	{
 		$result .= '<th>Destination</th>';
-		$result .= '<th>Departure</th>';
+		$result .= '<th>Off-block</th>';
 	}
 	
-	$result .= "	<th>Position</th>
+	$result .= "	<th>Parking</th>
 					<th>Status</th>
 				</tr>
 			</thead>
 		<tbody>";
 	
+	$user = Session::User();
 	foreach ($flights as $f)
 	{
+		if (str_starts_with($f->callsign, "HUN") && $user?->division != "HU" && $user?->permission < 2)
+			continue;
+
 		$result .= '<tr>';		
 
 		if ($airline = $f->getAirline())
-			$result .= '<td data-toggle="tooltip" title="' . $airline->name . '" data-search="' . $airline->name . '" data-order="' . $airline->name . '">' . $airline->getLogo() . "</td>";		
+			$result .= '<td data-search="' . $airline->name . '" data-order="' . $airline->name . '">' . $airline->getLogo() . " ";
 		else
-			$result .= '<td data-search="' . $f->flightNumber . '" data-order="' . $f->flightNumber . '"></td>';
+			$result .= '<td data-search="' . $f->flightNumber . '" data-order="' . $f->flightNumber . '">';		
+		$result .= '</td>';
 
 		$result .= '<td>';
 		if (empty($f->flightNumber) || $f->flightNumber == $f->callsign)
-			$result .= $f->callsign;
+			$result .= "<strong>" . $f->callsign . "</strong>";
 		else if (empty($f->callsign))
 			$result .= $f->flightNumber;
 		else
-			$result .= $f->flightNumber . ' / ' . $f->callsign;
+			$result .= "<strong>" . $f->callsign . '</strong><br><small class="text-muted">' . $f->flightNumber . '</small>';
+			// $result .= $f->flightNumber . ' / ' . $f->callsign;
 
-		$result .= $f->getTurnoverFlights() ? '<span class="turnoverIcon" data-toggle="tooltip" title="Turnover flight available"></span>' : '';
+		$result .= $f->getTurnoverFlights() ? '<span data-toggle="tooltip" title="Turnover flight available" class="ml-2"><i class="fas fa-sync fa-spin"></i></span> ' : '';
+		$result .= $f->briefing !== null ? '<span data-toggle="tooltip" title="Check Flight Briefing section" class="ml-1"><i class="fas fa-info-circle"></i></span> ' : '';
 		$result .= '</td>';
 
-		$result .= '<td><span data-toggle="tooltip" title="' . $f->getAircraftName() . '">' . $f->aircraftIcao . ($f->aircraftFreighter ? "/F" : "") . '</span></td>';
+		$result .= '<td><span data-toggle="tooltip" title="' . $f->getAircraftName() . '">' . $f->aircraftIcao . ($f->aircraftFreighter ? '<br><small class="text-muted">Cargo</small>' : '') . '</span></td>';
 		
 		if ($type == "arrivals")
 		{
 			if ($origin = $f->getOrigin())
-				$result .= '<td>' . $origin->getCountryFlag(24) . $origin->icao . ' <small class="text-muted">' . $origin->name . '</small></td>';
+				$result .= '<td><strong>' . $origin->getCountryFlag(24) . $origin->icao . '</strong><br><small class="text-muted">' . $origin->name . '</small></td>';
 			else
-				$result .= '<td>' . $f->originIcao . '</td>';
-			$result .= '<td data-order="' . $f->arrivalTime . '">' . getHumanDateTime($f->arrivalTime) . '</td>';						
+				$result .= '<td><strong>' . $f->originIcao . '</strong></td>';
+			$result .= '<td data-order="' . $f->arrivalTime . '">' . getHumanDateTime($f->arrivalTime, $config["time_only_in_list"]) . '</td>';						
 		}
 		elseif ($type == "departures")
 		{
 			if ($dest = $f->getDestination())
-				$result .= '<td>' . $dest->getCountryFlag(24) . $dest->icao . ' <small class="text-muted">' . $dest->name . '</small></td>';
+				$result .= '<td><strong>' . $dest->getCountryFlag(24) . $dest->icao . '</strong><br><small class="text-muted">' . $dest->name . '</small></td>';
 			else
-				$result .= '<td>' . $f->destinationIcao . '</td>';
+				$result .= '<td><strong>' . $f->destinationIcao . '</strong></td>';
 
-			$result .= '<td data-order="' . $f->departureTime . '">' . getHumanDateTime($f->departureTime) . '</td>';						
+			$result .= '<td data-order="' . $f->departureTime . '">' . getHumanDateTime($f->departureTime, $config["time_only_in_list"]) . '</td>';						
 		}
 		
-		$result .= '<td>' . $f->getPosition() . '</td>';
+		$result .= '<td>' . $f->getPosition(true, true) . '</td>';
 
 		if ($f->booked == "free")
-			$result .= '<td data-order="0" data-search="free"><button class="btn btn-success btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-thumbs-up"></i> Book now!</button></td>';
+			$result .= '<td data-order="0" data-search="free"><button class="btn btn-success btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-thumbs-up"></i> Available</button></td>';
 		
 		if ($f->booked == "prebooked")
-			$result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Prebooked by <strong>' . $f->bookedBy . '</strong></button></td>';
+			// $result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Reserved by <strong>' . $f->bookedBy . '</strong></button></td>';
+			$result .= '<td data-order="1" data-search="prebooked"><button class="btn btn-warning btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Reserved</strong></button></td>';
 		
 		if ($f->booked == "booked")
-			$result .= '<td data-order="2" data-search="booked"><button class="btn btn-danger btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Booked by <strong>' . $f->bookedBy . '</strong></button></td>';
+			// $result .= '<td data-order="2" data-search="booked"><button class="btn btn-danger btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Booked by <strong>' . $f->bookedBy . '</strong></button></td>';
+			$result .= '<td data-order="2" data-search="booked"><button class="btn btn-danger btn-sm btn-block" onclick="getFlight(' . $f->id . ')"><i class="fas fa-lock"></i> Booked</strong></button></td>';
 
 		$result .= '</tr>';
 	}
@@ -151,10 +162,13 @@ if (count($apts) > 0)
 		echo '
 			<ul class="nav nav-tabs" id="arrDepTab" role="tablist">
 				<li class="nav-item">
-					<a class="nav-link active text-success" data-toggle="tab" href="#departures' . $apt->icao . '" role="tab" aria-selected="true"><i class="fas fa-plane-departure"></i> Departures</a>
+					<a class="nav-link active text-success tabFlightlist" data-toggle="tab" href="#departures' . $apt->icao . '" role="tab" aria-selected="true"><i class="fas fa-plane-departure"></i> Departures</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link text-danger" data-toggle="tab" href="#arrivals' . $apt->icao . '" role="tab" aria-selected="false"><i class="fas fa-plane-arrival"></i> Arrivals</a>
+					<a class="nav-link text-danger tabFlightlist" data-toggle="tab" href="#arrivals' . $apt->icao . '" role="tab" aria-selected="false"><i class="fas fa-plane-arrival"></i> Arrivals</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link text-info" href="slots#' . $apt->icao . '" role="tab" aria-selected="true"><i class="fas fa-key"></i> Private slots</a>
 				</li>
 			</ul>
 			
@@ -165,7 +179,7 @@ if (count($apts) > 0)
 	}
 }
 else
-	echo '<div class="alert alert-info">There are no airports participating on the event currently. Please check back regularly!</div>';
+	echo '<div class="alert alert-info">Currently, no airports are participating in the event. Please check back regularly for updates.</div>';
 
 echo '</main>';
 

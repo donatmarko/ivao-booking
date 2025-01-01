@@ -20,11 +20,10 @@ class EventAirport
 	public static function Find($icao)
 	{
 		global $db;
-		if ($query = $db->Query("SELECT * FROM airports WHERE icao = §", $icao))
-		{
-			if ($row = $query->fetch_assoc())
-				return new EventAirport($row);
-		}
+		$query = $db->Query("SELECT * FROM airports WHERE icao = §", $icao);
+		if ($row = $query->fetch_assoc())
+			return new EventAirport($row);
+
 		return null;
 	}
 
@@ -36,11 +35,10 @@ class EventAirport
 	public static function FindId($id)
 	{
 		global $db;
-		if ($query = $db->Query("SELECT * FROM airports WHERE id = §", $id))
-		{
-			if ($row = $query->fetch_assoc())
-				return new EventAirport($row);
-		}
+		$query = $db->Query("SELECT * FROM airports WHERE id = §", $id);
+		if ($row = $query->fetch_assoc())
+			return new EventAirport($row);
+
 		return null;
 	}
 	
@@ -59,11 +57,10 @@ class EventAirport
 		else
 			$sql = "SELECT * FROM airports WHERE enabled = true ORDER BY `order`";
 
-		if ($query = $db->Query($sql))
-		{
-			while ($row = $query->fetch_assoc())
-				$apts[] = new EventAirport($row);
-		}
+		$query = $db->Query($sql);
+		while ($row = $query->fetch_assoc())
+			$apts[] = new EventAirport($row);
+
 		return $apts;
 	}
 
@@ -94,22 +91,50 @@ class EventAirport
 			"booked" => 0
 		];
 
-		if ($query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights GROUP BY booked"))
+		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights GROUP BY booked");
+		while ($row = $query->fetch_assoc())
 		{
-			while ($row = $query->fetch_assoc())
+			switch ($row["booked"])
 			{
-				switch ($row["booked"])
-				{
-					case 0:
-						$stat["free"] = $row["num"];
-						break;
-					case 1:
-						$stat["prebooked"] = $row["num"];
-						break;
-					case 2:
-						$stat["booked"] = $row["num"];
-						break;
-				}
+				case 0:
+					$stat["free"] = $row["num"];
+					break;
+				case 1:
+					$stat["prebooked"] = $row["num"];
+					break;
+				case 2:
+					$stat["booked"] = $row["num"];
+					break;
+			}
+		}
+		return $stat;
+	}
+
+	public static function getSlotStatisticsAll()
+	{ 
+		global $db;
+		$stat = [
+			"free" => 0,
+			"requested" => 0,
+			"granted" => 0
+		];
+
+		foreach (Timeframe::GetAll() as $tf)
+		{
+			$stat["free"] += $tf->count;
+		}
+
+		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM slots GROUP BY booked");
+		while ($row = $query->fetch_assoc())
+		{
+			switch ($row["booked"])
+			{
+				case 1:
+					$stat["requested"] = $row["num"];
+					break;
+				case 2:
+					$stat["granted"] = $row["num"];
+					break;
 			}
 		}
 		return $stat;
@@ -145,11 +170,10 @@ class EventAirport
 	{
 		global $db;
 		$flights = [];
-		if ($query = $db->Query("SELECT * FROM flights WHERE origin_icao = § ORDER BY departure_time, flight_number", $this->icao))
-		{
-			while ($row = $query->fetch_assoc())
-				$flights[] = new Flight($row);
-		}
+		$query = $db->Query("SELECT * FROM flights WHERE origin_icao = § ORDER BY departure_time, flight_number", $this->icao);
+		while ($row = $query->fetch_assoc())
+			$flights[] = new Flight($row);
+
 		return $flights;
 	}
 	
@@ -161,13 +185,10 @@ class EventAirport
 	{
 		global $db;
 		$flights = [];
-		if ($query = $db->Query("SELECT * FROM flights WHERE destination_icao = § ORDER BY arrival_time, flight_number", $this->icao))
-		{
-			while ($row = $query->fetch_assoc())
-			{
-				$flights[] = new Flight($row);
-			}
-		}
+		$query = $db->Query("SELECT * FROM flights WHERE destination_icao = § ORDER BY arrival_time, flight_number", $this->icao);
+		while ($row = $query->fetch_assoc())
+			$flights[] = new Flight($row);
+
 		return $flights;
 	}
 
@@ -184,22 +205,50 @@ class EventAirport
 			"booked" => 0
 		];
 
-		if ($query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights WHERE origin_icao = § OR destination_icao = § GROUP BY booked", $this->icao, $this->icao))
-		{ 
-			while ($row = $query->fetch_assoc())
+		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM flights WHERE origin_icao = § OR destination_icao = § GROUP BY booked", $this->icao, $this->icao);
+		while ($row = $query->fetch_assoc())
+		{
+			switch ($row["booked"])
 			{
-				switch ($row["booked"])
-				{
-					case 0:
-						$stat["free"] = $row["num"];
-						break;
-					case 1:
-						$stat["prebooked"] = $row["num"];
-						break;
-					case 2:
-						$stat["booked"] = $row["num"];
-						break;
-				}
+				case 0:
+					$stat["free"] = $row["num"];
+					break;
+				case 1:
+					$stat["prebooked"] = $row["num"];
+					break;
+				case 2:
+					$stat["booked"] = $row["num"];
+					break;
+			}
+		}
+		return $stat;
+	}
+
+	public function getSlotStatistics()
+	{ 
+		global $db;
+		$stat = [
+			"free" => 0,
+			"requested" => 0,
+			"granted" => 0,
+		];
+
+		foreach ($this->getTimeframes() as $tf)
+		{
+			$stat["free"] += $tf->count;
+		}
+
+		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM slots WHERE origin_icao = § OR destination_icao = § GROUP BY booked", $this->icao, $this->icao);
+		while ($row = $query->fetch_assoc())
+		{
+			switch ($row["booked"])
+			{
+				case 1:
+					$stat["requested"] = $row["num"];
+					break;
+				case 2:
+					$stat["granted"] = $row["num"];
+					break;
 			}
 		}
 		return $stat;
@@ -229,14 +278,11 @@ class EventAirport
 	public function Update($array)
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			if ($db->Query("UPDATE airports SET icao = §, name = §, `order` = §, enabled = § WHERE id = §", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true", $this->id))
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
-		return -1;
+
+		$db->Query("UPDATE airports SET icao = §, name = §, `order` = §, enabled = § WHERE id = §", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true", $this->id);
+		return 0;
 	}
 
 	/**
@@ -247,14 +293,11 @@ class EventAirport
 	public static function Create($array)
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			if ($db->Query("INSERT INTO airports (icao, name, `order`, enabled) VALUES (§, §, §, §)", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true"))
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
-		return -1;
+
+		$db->Query("INSERT INTO airports (icao, name, `order`, enabled) VALUES (§, §, §, §)", $array["icao"], $array["name"], $array["order"], $array["enabled"] == "true");
+		return 0;
 	}
 
 	/**
@@ -264,14 +307,11 @@ class EventAirport
 	public function Delete()
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			if ($db->Query("DELETE FROM airports WHERE id = §", $this->id))
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
-		return -1;
+
+		$db->Query("DELETE FROM airports WHERE id = §", $this->id);
+		return 0;
 	}
 
 	/**
@@ -282,12 +322,35 @@ class EventAirport
 	{
 		global $db;
 		$tfs = [];
-		if ($query = $db->Query("SELECT * FROM timeframes WHERE airport_icao = § ORDER BY time", $this->icao))
-		{
-			while ($row = $query->fetch_assoc())
-				$tfs[] = new Timeframe($row);
-		}
+		$query = $db->Query("SELECT * FROM timeframes WHERE airport_icao = § ORDER BY time", $this->icao);
+		while ($row = $query->fetch_assoc())
+			$tfs[] = new Timeframe($row);
+		
 		return $tfs;
+	}
+
+	public function getFlights()
+	{
+		global $db;
+
+		$flights = json_decode(Flight::ToJsonAll());
+		$deps = array_values(array_filter($flights, fn($x) => $x->originIcao == $this->icao));
+		$arrs = array_values(array_filter($flights, fn($x) => $x->destinationIcao == $this->icao));
+
+		$slots = json_decode(Slot::ToJsonAll());
+		$depslots = array_values(array_filter($slots, fn($x) => $x->originIcao == $this->icao));
+		$arrslots = array_values(array_filter($slots, fn($x) => $x->destinationIcao == $this->icao));
+
+		return json_encode([
+			"flights" => [
+				"departures" => $deps, 
+				"arrivals" => $arrs,
+			],
+			"slots" => [
+				"departures" => $depslots,
+				"arrivals" => $arrslots,
+			]
+		]);
 	}
 }
   
