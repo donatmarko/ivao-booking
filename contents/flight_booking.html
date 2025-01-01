@@ -1,15 +1,11 @@
-<p>Dear %flt_bookerFirstname%,</p>
+<p>Hi %flt_bookerFirstname%,</p>
 
-<p>A scheduled flight has been <strong>pre-booked</strong> with your IVAO account.</p>
+<p>Here is your flight reservation summary:</p>
 
 <p>
 	<table border="1" style="border-collapse: collapse">
 		<tr>
-			<th>Flight number</th>
-			<td>%flt_flightNumber%</td>
-		</tr>
-		<tr>
-			<th>Callsign</th>
+			<th>Flight</th>
 			<td>%flt_callsign%</td>
 		</tr>
 		<tr>
@@ -17,11 +13,11 @@
 			<td>%flt_aircraft%</td>
 		</tr>
 		<tr>
-			<th>Departure</th>
+			<th>Off-Block</th>
 			<td>%flt_departure%</td>
 		</tr>
 		<tr>
-			<th>Destination</th>
+			<th>On-Block</th>
 			<td>%flt_destination%</td>
 		</tr>
 		<tr>
@@ -33,15 +29,12 @@
 			<td>%flt_position%</td>
 		</tr>
 	</table>
-	<em>Please note that the flight data (especially terminal/gate) might change in the meantime. Check the booking page regularly!</em>
 </p>
 
-<p>If you have real intentions to accomplish this flight, in order to confirm your booking, please click the following link: <a href="%url%/?f=token&id=%flt_token%">%url%/?f=token&id=%flt_token%</a>.</p>
+<strong>Confirm your reservation</strong>
+<p>Important! Confirm your flight reservation here: <a href="%url%/?f=token&id=%flt_token%">%url%/?f=token&id=%flt_token%</a></p>
 
-<p>If you can't fly this flight, please <a href="%url%/mybookings">delete your booking in the booking system</a> to give chance to the others to book this particular one.
+<p>If you can not fly this flight, cancel your booking <a href="%url%/mybookings">here</a>. Events staff might decide to delete any unconfirmed reservations otherwise.
 
-<p>The flight remains in pre-booked state until it has been confirmed. If the interest become high on the flights, the Events staff might decide to delete the unconfirmed bookings to give opportunity for the newcomers to book their favourite flight.</p>
-
-
-<p><br>Sincerely yours,<br>
-%division_name% Events staff</p>
+<p><br>Regards,<br>
+%division_name% Events Department</p>
