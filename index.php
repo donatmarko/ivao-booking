@@ -8,8 +8,8 @@
  */
 
 // only for debug purposes
-ini_set("display_errors", "on");
-error_reporting(E_ALL);
+// ini_set("display_errors", "on");
+// error_reporting(E_ALL);
 
 $start_time = microtime(true);
 
@@ -33,7 +33,6 @@ session_start();
 
 $page = $_GET["f"] ?? "";
 $db = new DB(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
-$dbNav = new DB(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE_NAV);
 
 $config = Config::Get();
 Session::CheckAccess();
@@ -136,7 +135,8 @@ echo Pages::Get();
 				<?php endif; ?>
 			</div>
 			<div class="col-md-4 text-md-right">
-				<p>Developed by <a href="https://www.ivao.aero/Member.aspx?ID=540147" target="_blank">Donat Marko (540147)</a></p>
+				<p>Created with ❤️ by <a href="https://www.ivao.aero/Member.aspx?ID=540147" target="_blank">Donát Markó (540147)</a></p>
+				<p><a href="https://wiki.ivao.aero/en/home/structure/association/motions/privacy-policy" target="_blank">IVAO Privacy Policy</a></p>
 				<p>Loaded in <?=round((microtime(true) - $start_time) * 1000, 2); ?> ms</p>
 			</div>
 		</div>
@@ -164,7 +164,4 @@ echo Pages::Get();
 
 </html>
 
-<?php
-$db->Close();
-$dbNav->Close();
-?>
+<?php $db->Close(); ?>

@@ -162,7 +162,7 @@ class Pages
 	{
 		$result = "";
 		foreach (Pages::$scripts as $s)
-			$result .= sprintf('<script src="%s"></script>', $s);
+			$result .= sprintf('<script>%s</script>', file_get_contents($s));
 
 		if (!empty(Pages::$js))
 			$result .= sprintf('<script>%s</script>', Pages::$js);
@@ -199,7 +199,14 @@ class Menu
 		echo '
 		<nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
 			<div class="container">
-				<a class="navbar-brand" href="' . SITE_URL . '">' . $config["event_name"] . '</a>
+				<a class="navbar-brand" href="' . SITE_URL . '">';
+
+		if (!empty($config["division_logo"]))
+			echo '<img class="img-fluid" src="' . $config["division_logo"] . '" width="130">';
+		else
+			echo $config["event_name"];
+
+		echo '</a>
 				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>

@@ -12,6 +12,12 @@
  */
 class Timeframe 
 {
+	const TYPES = [
+		"BOTH",
+		"ARR",
+		"DEP"
+	];
+
 	/**
 	 * Converts all tiemframes to JSON format
 	 * Used by the admin area through AJAX
@@ -48,7 +54,7 @@ class Timeframe
 		global $db;
 		$timeframes = [];
 
-		if ($query = $db->Query("SELECT * FROM timeframes ORDER BY airport_icao, time"))
+		if ($query = $db->Query("SELECT * FROM timeframes ORDER BY airport_icao, time, type"))
 		{
 			while ($row = $query->fetch_assoc())
 				$timeframes[] = new Timeframe($row);
@@ -64,30 +70,25 @@ class Timeframe
 	public static function Create($array)
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			$ok = true;
-			for ($i = $array["hour_from"]; $i <= $array["hour_to"]; $i++)
-			{
-				$datetime = sprintf("%s %s:%s:00", $array["date"], $i, $array["minute"]);
-				if (!$db->Query("INSERT INTO timeframes (airport_icao, `time`, `count`) VALUES (§, §, §)", $array["airport_icao"], $datetime, $array["count"]))
-					$ok = false;
-			}
-
-			if ($ok)
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
 
-		return -1;
+		$ok = true;
+		for ($i = $array["hour_from"]; $i <= $array["hour_to"]; $i++)
+		{
+			$datetime = sprintf("%s %s:%s:00", $array["date"], $i, $array["minute"]);
+			$db->Query("INSERT INTO timeframes (airport_icao, `type`, `time`, `count`) VALUES (§, §, §, §)", $array["airport_icao"], $array["timeframe_type"], $datetime, $array["count"]);
+		}
+
+		return 0;
 	}
 
-	public $id, $airportIcao, $time, $count;	
+	public $id, $airportIcao, $type, $time, $count;	
 	public function __construct($row)
 	{
 		$this->id = (int)$row["id"];
 		$this->airportIcao = $row["airport_icao"];
+		$this->type = (int)$row["type"];
 		$this->time = $row["time"];
 		$this->count = (int)$row["count"];
 	}
@@ -120,14 +121,11 @@ class Timeframe
 	public function Update($array)
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			if ($db->Query("UPDATE timeframes SET `time` = §, `count` = § WHERE id = §", $array["time"], $array["count"], $this->id))
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
-		return -1;
+
+		$db->Query("UPDATE timeframes SET `type` = §, `time` = §, `count` = § WHERE id = §", $array["timeframe_type"], $array["time"], $array["count"], $this->id);
+		return 0;
 	}
 
 	/**
@@ -172,6 +170,7 @@ class Timeframe
 		$data = [
 			"eventAirport" => $apt ? json_decode($apt->ToJson()) : null,
 			"timeHuman" => getHumanDateTime($this->time),
+			"typeHuman" => $this->getType(),
 			"statistics" => $this->GetStatistics(),
 			"sessionUser" => Session::LoggedIn() ? json_decode(Session::User()->ToJson()) : null,
 		];
@@ -231,5 +230,10 @@ class Timeframe
 	public function getEventAirport()
 	{
 		return EventAirport::Find($this->airportIcao);
+	}
+
+	public function getType()
+	{
+		return self::TYPES[$this->type];
 	}
 }

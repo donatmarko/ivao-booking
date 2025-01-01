@@ -12,6 +12,21 @@
  */
 class Flight
 {
+	protected const BOOK_STATES = [
+		"free",
+		"prebooked",
+		"booked"
+	];
+
+	protected const SQL_SKELETON = "SELECT
+			f.*,
+			a.callsign radio_callsign
+		FROM flights f
+		LEFT JOIN nav_airlines a ON
+			LEFT(f.callsign, 3) LIKE a.icao
+		WHERE
+			1 = 1";
+
 	/**
 	 * Finding and returning flight based on its ID.
 	 * If flight doesn't exist, returns null.
@@ -21,11 +36,11 @@ class Flight
 	public static function Find($id)
 	{
 		global $db;
-		if ($query = $db->Query("SELECT * FROM flights WHERE id = §", $id))
-		{
-			if ($row = $query->fetch_assoc())
-				return new Flight($row);
-		}
+		$query = $db->Query(sprintf("%s AND f.id = §", self::SQL_SKELETON), $id);
+
+		if ($row = $query->fetch_assoc())
+			return new Flight($row);
+
 		return null;
 	}
 
@@ -38,11 +53,10 @@ class Flight
 	public static function FindToken($token)
 	{
 		global $db;
-		if ($query = $db->Query("SELECT * FROM flights WHERE token = §", $token))
-		{
-			if ($row = $query->fetch_assoc())
-				return new Flight($row);
-		}
+		$query = $db->Query("SELECT * FROM flights WHERE token = §", $token);
+		if ($row = $query->fetch_assoc())
+			return new Flight($row);
+
 		return null;
 	}
 
@@ -54,12 +68,14 @@ class Flight
 	{
 		global $db;
 		$flts = [];
+		$u = Session::User();
 
-		if ($query = $db->Query("SELECT * FROM flights ORDER BY departure_time, flight_number"))
+		$query = $db->Query("SELECT * FROM flights ORDER BY departure_time, flight_number");
+		while ($row = $query->fetch_assoc())
 		{
-			while ($row = $query->fetch_assoc())
-				$flts[] = new Flight($row);
+			$flts[] = new Flight($row);
 		}
+
 		return $flts;
 	}
 
@@ -89,38 +105,33 @@ class Flight
 	public static function Create($array)
 	{
 		global $db;
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
-				return 1;
-
-			$depTime = $array["departure_estimated"] == "true" ? null : $array["departure_time"];
-			$arrTime = $array["arrival_estimated"] == "true" ? null : $array["arrival_time"];
-			$aircraft_freighter = $array["aircraft_freighter"] == "true";
-	
-			if ($db->Query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, §, §, NOW())",
-				$array["flight_number"],
-				$array["callsign"],
-				$array["origin_icao"],
-				$array["destination_icao"],
-				$depTime,
-				$arrTime,
-				$array["aircraft_icao"],
-				$aircraft_freighter,
-				$array["terminal"],
-				$array["gate"],
-				$array["route"],
-				$array["booked"],
-				$array["booked_by"]
-			))
-			{
-				return 0;
-			}
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
 
-		return -1;
+		if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
+			return 1;
+
+		$depTime = $array["departure_estimated"] == "true" ? null : $array["departure_time"];
+		$arrTime = $array["arrival_estimated"] == "true" ? null : $array["arrival_time"];
+		$aircraft_freighter = $array["aircraft_freighter"] == "true";
+
+		$db->Query("INSERT INTO flights (flight_number, callsign, origin_icao, destination_icao, departure_time, arrival_time, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, §, §, NOW())",
+			$array["flight_number"],
+			$array["callsign"],
+			$array["origin_icao"],
+			$array["destination_icao"],
+			$depTime,
+			$arrTime,
+			$array["aircraft_icao"],
+			$aircraft_freighter,
+			$array["terminal"],
+			$array["gate"],
+			$array["route"],
+			$array["booked"],
+			$array["booked_by"]
+		);
+
+		return 0;
 	}
 
 	/**
@@ -131,66 +142,66 @@ class Flight
 	{
 		global $page;
 		
-		if ($page == "token" && isset($_GET["id"]))
-		{
-			if (Session::LoggedIn())
-				$page = "mybookings";
-			else
-				$page = "";
+		if ($page != "token" || !isset($_GET["id"]))
+			return;
 
-			if ($flt = Flight::FindToken($_GET["id"]))
+		if (Session::LoggedIn())
+			$page = "mybookings";
+		else
+			$page = "";
+
+		if ($flt = Flight::FindToken($_GET["id"]))
+		{
+			$result = $flt->Book();
+			switch ($result)
 			{
-				$result = $flt->Book();
-				switch ($result)
-				{
-					case 0:
-						Pages::AddJSinline('
-							swal2({
-								title: "Flight booking has been confirmed!",
-								text: "We\'re waiting for you at the event!",
-								type: "success",
-								confirmButtonText: "YAY!",
-								timer: 5000,
-							});
-						');
-						break;
-					case 403:
-						Pages::AddJSinline('
-							swal2({
-								title: "You have no access to confirm the booking!",
-								text: "If you are logged in with a different VID than the original booker, please log out.",
-								type: "error",
-								confirmButtonText: "RIP",
-								timer: 5000,
-							}).then((value) => { window.location.href="mybookings"; });
-						');
-						break;
-					default:
-						Pages::AddJSinline('
-							swal2({
-								title: "Error while confirming the flight!",
-								text: "An unknown error occured during the process. Please try again!",
-								type: "error",
-								confirmButtonText: "RIP",
-								timer: 5000,
-							}).then((value) => { window.location.href="mybookings"; });
-						');
-						break;
-				}
-				
+				case 0:
+					Pages::AddJSinline('
+						swal2({
+							title: "Flight booking has been confirmed!",
+							text: "We\'re waiting for you at the event!",
+							type: "success",
+							confirmButtonText: "YAY!",
+							timer: 5000,
+						});
+					');
+					break;
+				case 403:
+					Pages::AddJSinline('
+						swal2({
+							title: "You have no access to confirm the booking!",
+							text: "If you are logged in with a different VID than the original booker, please log out.",
+							type: "error",
+							confirmButtonText: "RIP",
+							timer: 5000,
+						}).then((value) => { window.location.href="mybookings"; });
+					');
+					break;
+				default:
+					Pages::AddJSinline('
+						swal2({
+							title: "Error while confirming the flight!",
+							text: "An unknown error occured during the process. Please try again!",
+							type: "error",
+							confirmButtonText: "RIP",
+							timer: 5000,
+						}).then((value) => { window.location.href="mybookings"; });
+					');
+					break;
 			}
-			else
-			{
-				Pages::AddJSinline('
-					swal2({
-						title: "No flight has been found with the given token!",
-						text: "The flight has likely already been confirmed, or the token is invalid.",
-						type: "error",
-						confirmButtonText: "RIP",
-						timer: 5000,
-					}).then((value) => { window.location.href="mybookings"; });
-				');
-			}
+			
+		}
+		else
+		{
+			Pages::AddJSinline('
+				swal2({
+					title: "No flight has been found with the given token!",
+					text: "The flight has likely already been confirmed, or the token is invalid.",
+					type: "error",
+					confirmButtonText: "RIP",
+					timer: 5000,
+				}).then((value) => { window.location.href="mybookings"; });
+			');
 		}
 	}
 
@@ -210,39 +221,50 @@ class Flight
 	 */
 	public static function ResendConfirmationEmails()
 	{
-		if (Session::LoggedIn() && Session::User()->permission > 1)
-		{
-			$flts = [];
-			foreach (Flight::GetAll() as $flt)
-			{
-				if ($flt->booked == "prebooked")
-				{
-					if ($user = User::Find($flt->bookedBy))
-					{
-						if (!empty($user->email))
-							$flts[] = $flt;
-					}
-				}
-			}
-
-			$error = false;
-			foreach ($flts as $flt)
-			{
-				if ($flt->SendConfirmationEmail() != 0)
-					$error = true;
-			}
-
-			if ($error)
-				return 1;
-			else
-				return 0;
-		}
-		else
+		if (!Session::LoggedIn() || Session::User()->permission < 2)
 			return 403;
-		return -1;
+
+		$flts = [];
+		foreach (Flight::GetAll() as $flt)
+		{
+			if ($flt->booked != "prebooked")
+				continue;
+
+			$user = User::Find($flt->bookedBy);
+			if (!empty($user?->email))
+				$flts[] = $flt;
+		}
+
+		$error = false;
+		foreach ($flts as $flt)
+		{
+			if ($flt->SendConfirmationEmail() != 0)
+				$error = true;
+		}
+
+		if ($error)
+			return 1;
+
+		return 0;
 	}
 
-	public $id, $flightNumber, $callsign, $aircraftIcao, $aircraftFreighter, $originIcao, $destinationIcao, $departureTime, $isDepartureEstimated, $arrivalTime, $isArrivalEstimated, $terminal, $gate, $route;
+	public static function getBookedFlights()
+	{
+		$flights = array_filter(self::GetAll(), fn($x) => in_array($x->booked, ['prebooked', 'booked']));
+		$slots = array_filter(Slot::GetAll(), fn($x) => $x->booked == 'granted');
+
+		function cmp($a, $b) {
+			$atime = strtotime(!$a->isDepartureEstimated ? $a->departureTime : $a->arrivalTime);
+			$btime = strtotime(!$b->isDepartureEstimated ? $b->departureTime : $b->arrivalTime);
+			return $atime <=> $btime;
+		}
+		
+		usort($flights, 'cmp');
+		usort($slots, 'cmp');
+		return array_merge($flights, $slots);
+	}
+
+	public $id, $turnoverId, $flightNumber, $callsign, $aircraftIcao, $aircraftFreighter, $originIcao, $destinationIcao, $departureTime, $isDepartureEstimated, $arrivalTime, $isArrivalEstimated, $terminal, $gate, $route, $briefing;
 	public $booked, $bookedAt, $bookedBy, $token;
 	/**
 	 * @param array $row - associative array from fetch_assoc()
@@ -250,6 +272,7 @@ class Flight
 	public function __construct($row)
 	{
 		$this->id = (int)$row["id"];
+		$this->turnoverId = $row["turnover_id"];
 		$this->flightNumber = $row["flight_number"];
 		$this->callsign = $row["callsign"];
 		$this->aircraftIcao = $row["aircraft_icao"];
@@ -259,24 +282,13 @@ class Flight
 		$this->terminal = $row["terminal"];
 		$this->gate = $row["gate"];
 		$this->route = $row["route"];
+		$this->briefing = $row["briefing"];
 		$this->bookedAt = $row["booked_at"];
 		$this->bookedBy = (int)$row["booked_by"];
 		$this->token = $row["token"];
 		$this->isDepartureEstimated = false;
 		$this->isArrivalEstimated = false;
-
-		switch ($row["booked"])
-		{
-			case 1:
-				$this->booked = "prebooked";
-				break;
-			case 2:
-				$this->booked = "booked";
-				break;
-			default:
-				$this->booked = "free";
-				break;
-		}
+		$this->booked = self::BOOK_STATES[$row["booked"]];
 
 		if ($row["departure_time"] != 0 && $row["arrival_time"] == 0)
 		{
@@ -315,28 +327,23 @@ class Flight
 	 */
 	public function getCalculatedEET()
 	{
-		global $dbNav;
+		global $db;
 
 		$ori = $this->getOrigin();
 		$des = $this->getDestination();
 		if (!$ori || !$des)
 			return null;
 
-		$gcd = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
-		$speed = 250;
+		$dist = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
+		$tas = 300;
 
-		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
-		{
-			if ($row = $query->fetch_assoc())
-			{
-				if ($row["speed"] > 0)
-					$speed = (int)$row["speed"];
-			}
+		$query = $db->Query("SELECT * FROM nav_aircrafts WHERE icao = §", $this->aircraftIcao);
+		if ($row = $query->fetch_assoc()) {
+			if ($row["speed"] > 0)
+				$tas = (int)$row["speed"];
 		}
 
-		// some correction (for climb and descent)
-		$t = round(($gcd / $speed + 0.66) * 3600);
-		return $t;
+		return calculate_eet($dist, $tas);
 	}
 
 	/**
@@ -375,7 +382,7 @@ class Flight
 	 * @param bool $graphical if false, it will be text only for emails, otherwise Bootstrap 4 badges for UI/UX
 	 * @return string
 	 */
-	public function getPosition($graphical = true)
+	public function getPosition($graphical = true, $flight_list = false)
 	{
 		$t = "";
 		$g = "";
@@ -383,51 +390,52 @@ class Flight
 		if ($graphical)
 		{
 			if (empty($this->terminal) && empty($this->gate))
-				$t = '<span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="No data available"><i class="fas fa-question"></i></span>';
-			else
+				return '<span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="No data available"><i class="fas fa-question"></i></span>';
+
+			if (!empty($this->terminal))
 			{
-				if (!empty($this->terminal))
-				{
-					if ($this->terminal === "TBD")
-						$t = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Terminal: to be determined"><i class="far fa-building"></i> TBD</span> ';
-					else
-						$t = '<span class="badge badge-primary" data-toggle="tooltip" data-placement="top" title="Terminal"><i class="far fa-building"></i> ' . $this->terminal . '</span> ';
-				}
-				if (!empty($this->gate))
-				{
-					if ($this->gate === "TBD")
-						$g = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Gate: to be determined"><i class="fas fa-plane"></i> TBD</span>';
-					else
-						$g = '<span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="Gate"><i class="fas fa-plane"></i> ' . $this->gate . '</span>';								
-				}
-			}						
+				if ($this->terminal === "TBD")
+					$t = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Terminal: to be determined"><i class="far fa-building"></i> TBD</span> ';
+				else
+					$t = '<span class="badge badge-primary" data-toggle="tooltip" data-placement="top" title="Terminal"><i class="far fa-building"></i> ' . $this->terminal . '</span> ';
+			}
+			if (!empty($this->gate))
+			{
+				if ($this->gate === "TBD")
+					$g = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Position: to be determined"><i class="fas fa-plane"></i> TBD</span>';
+				else
+					$g = '<span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="Position"><i class="fas fa-plane"></i> ' . $this->gate . '</span>';								
+			}
+
+			if ($flight_list)
+				return $t . '<br><span style="font-size: 1.25rem">' . $g . '</span>';
+
+			return $t . $g;
 		}
+
+
+		if (empty($this->terminal) && empty($this->gate))
+			$t = '(no data available)';
 		else
 		{
-			if (empty($this->terminal) && empty($this->gate))
-				$t = '(no data available)';
-			else
+			if (!empty($this->terminal))
 			{
-				if (!empty($this->terminal))
-				{
-					if ($this->terminal === "TBD")
-						$t = 'Terminal: to be determined ';
-					else
-						$t = 'Terminal: ' . $this->terminal;
-				}
-				if (!empty($this->gate))
-				{
-					if (!empty($t))
-						$t .= ' / ';
+				if ($this->terminal === "TBD")
+					$t = 'Terminal: to be determined ';
+				else
+					$t = 'Terminal: ' . $this->terminal;
+			}
+			if (!empty($this->gate))
+			{
+				if (!empty($t))
+					$t .= ' / ';
 
-					if ($this->gate === "TBD")
-						$g = 'Gate: to be determined';
-					else
-						$g = 'Gate: ' . $this->gate;
-				}
-			}						
-		}
-
+				if ($this->gate === "TBD")
+					$g = 'Position: to be determined';
+				else
+					$g = 'Position: ' . $this->gate;
+			}
+		}						
 		return $t . $g;
 	}
 	
@@ -437,16 +445,16 @@ class Flight
 	 */
 	public function getAircraftName()
 	{
-		global $dbNav;
-		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
+		global $db;
+		$query = $db->Query("SELECT * FROM nav_aircrafts WHERE icao = §", $this->aircraftIcao);
+		if ($row = $query->fetch_assoc())
 		{
-			if ($row = $query->fetch_assoc())
-			{
-				if ($this->aircraftFreighter)
-					return sprintf("%s (freighter)", $row["name"]);
-				return $row["name"];
-			}
+			if ($this->aircraftFreighter)
+				return sprintf("%s (cargo)", $row["name"]);
+
+			return $row["name"];
 		}
+
 		return "";
 	}
 	
@@ -457,7 +465,6 @@ class Flight
 	 */
 	public function ToJson()
 	{
-		global $config;
 		$flight = (array)$this;
 
 		$ori = $this->getOrigin();
@@ -467,7 +474,7 @@ class Flight
 		$data = [		
 			"departureTimeHuman" => getHumanDateTime($this->departureTime),
 			"arrivalTimeHuman" => getHumanDateTime($this->arrivalTime),
-			"position" => $this->getPosition(),
+			"position" => $this->getPosition(true, false),
 			"bookedAtHuman" => $this->booked !== "free" ? getHumanDateTime($this->bookedAt) : null,
 			"bookedByUser" => $this->booked !== "free" ? json_decode(User::Find($this->bookedBy)->ToJson(false)) : null,
 			"sessionUser" => Session::LoggedIn() ? json_decode(Session::User()->ToJson(false)) : null,
@@ -475,9 +482,9 @@ class Flight
 			"originAirport" => $ori ? json_decode($ori->ToJson()) : null,
 			"destinationAirport" => $des ? json_decode($des->ToJson()) : null,
 			"aircraftName" => $this->getAircraftName(),
-			"wxUrl" => $config["wx_url"],
 			"greatCircleDistanceNm" => $this->getGreatCircleDistance(),
 			"turnoverFlights" => $this->getTurnoverFlights(true),
+			"simbriefLink" => $this->getSimbriefLink(),
 		];
 
 		return json_encode(array_merge($flight, $data));
@@ -538,55 +545,50 @@ class Flight
 	{
 		global $db;
 
-		if (Session::LoggedIn())
+		if (!Session::LoggedIn())
+			return 403;
+
+		$u = Session::User();
+		
+		if ($this->booked != "free")
+			return -1;
+
+		// checking conflicts
+		$bookeds = [];
+		$conflictings = [];
+		foreach ($u->getBookedFlights() as $flt)
+			$bookeds[] = $flt->id;
+		foreach ($this->getConflictingFlights() as $flt)
+			$conflictings[] = $flt->id;
+		
+		$trueConflicts = array_intersect($bookeds, $conflictings);
+		if ($trueConflicts && count($trueConflicts) > 0)
 		{
-			$u = Session::User();
-			
-			if ($this->booked == "free")
-			{
-				// checking conflicts
-				$bookeds = [];
-				$conflictings = [];
-				foreach ($u->getBookedFlights() as $flt)
-					$bookeds[] = $flt->id;
-				foreach ($this->getConflictingFlights() as $flt)
-					$conflictings[] = $flt->id;
-				
-				$trueConflicts = array_intersect($bookeds, $conflictings);
-				if ($trueConflicts && count($trueConflicts) > 0)
-				{
-					// if the present flight conflicts with one of the booked ones
-					$callsigns = [];
-					foreach ($trueConflicts as $id)
-						$callsigns[] = Flight::Find($id)->callsign;
+			// if the present flight conflicts with one of the booked ones
+			$callsigns = [];
+			foreach ($trueConflicts as $id)
+				$callsigns[] = Flight::Find($id)->callsign;
 
-					echo json_encode(["error" => 2, "callsigns" => implode(", ", $callsigns)]);
-					die();
-				}
-				else
-				{
-					$token = md5(uniqid($u->vid . date("Y-m-d H:i:s")));
-					$this->token = $token;
-					$this->bookedBy = $u->vid;
-
-					if ($db->Query("UPDATE flights SET booked = 1, booked_by = §, booked_at = NOW(), token = § WHERE id = §", $u->vid, $token, $this->id))
-					{					
-						if (!empty($u->email))
-						{
-							if ($this->SendConfirmationEmail() === 0)
-								return 0;
-						}
-						else
-							return 0;
-					}
-				}
-			}
-			else
-				return 1;
+			echo json_encode(["error" => 2, "callsigns" => implode(", ", $callsigns)]);
+			die();
 		}
 		else
-			return 403;
-		return -1;
+		{
+			$token = md5(uniqid($u->vid . date("Y-m-d H:i:s")));
+			$this->token = $token;
+			$this->bookedBy = $u->vid;
+
+			$db->Query("UPDATE flights SET booked = 1, booked_by = §, booked_at = NOW(), token = § WHERE id = §", $u->vid, $token, $this->id);
+			discord_flight_message("Flight has been reserved", 16755968, $this);
+
+			if (!empty($u->email))
+			{
+				if ($this->SendConfirmationEmail() === 0)
+					return 0;
+			}
+			else
+				return 0;
+		}
 	}
 
 	/**
@@ -602,8 +604,9 @@ class Flight
 		{	
 			if ($this->booked == "prebooked")
 			{
-				if ($db->Query("UPDATE flights SET booked = 2, token = '' WHERE id = §", $this->id))
-					return 0;
+				$db->Query("UPDATE flights SET booked = 2, token = '' WHERE id = §", $this->id);
+				discord_flight_message("Flight booking has been confirmed", 10747648, $this);
+				return 0;
 			}
 			else
 				return 1;
@@ -629,8 +632,9 @@ class Flight
 			// only allow freeing if we are admins or the previous booker
 			if ($u->permission >= 2 || $u->vid == $this->bookedBy)
 			{			
-				if ($db->Query("UPDATE flights SET booked = 0, booked_by = 0, booked_at = NOW(), token = '' WHERE id = §", $this->id))
-					return 0;
+				$db->Query("UPDATE flights SET booked = 0, booked_by = 0, booked_at = NOW(), token = '' WHERE id = §", $this->id);
+				discord_flight_message("Flight booking has been deleted", 16711680, $this);
+				return 0;
 			}
 			else
 				return 403;
@@ -671,6 +675,9 @@ class Flight
 			if ($array["booked"] > 0 && !User::Find($array["booked_by"]))
 				return 1;
 
+			if ($array["booked"] > 0 && !$this->token)
+				$this->token = md5(uniqid($this->callsign, true));
+
 			$depTime = $array["departure_estimated"] == "true" ? null : $array["departure_time"];
 			$arrTime = $array["arrival_estimated"] == "true" ? null : $array["arrival_time"];
 			$aircraft_freighter = $array["aircraft_freighter"] == "true";
@@ -697,7 +704,7 @@ class Flight
 			}
 			else
 			{
-				if ($db->Query("UPDATE flights SET flight_number = §, callsign = §, origin_icao = §, destination_icao = §, departure_time = §, arrival_time = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = §, booked = §, booked_by = §, booked_at = NOW() WHERE id = §",
+				if ($db->Query("UPDATE flights SET flight_number = §, callsign = §, origin_icao = §, destination_icao = §, departure_time = §, arrival_time = §, aircraft_icao = §, aircraft_freighter = §, terminal = §, gate = §, route = §, token = §, booked = §, booked_by = §, booked_at = NOW() WHERE id = §",
 					$array["flight_number"],
 					$array["callsign"],
 					$array["origin_icao"],
@@ -709,6 +716,7 @@ class Flight
 					$array["terminal"],
 					$array["gate"],
 					$array["route"],
+					$this->token,
 					$array["booked"],
 					$array["booked_by"],
 					$this->id
@@ -806,44 +814,56 @@ class Flight
 	 */
 	public function getTurnoverFlights($toJson = false)
 	{
+		global $config;
+		if ($this->turnoverId !== null && $turnover = self::Find($this->turnoverId))
+		{
+			if ($toJson)
+				return [json_decode($turnover->ToJsonLite(), true)];
+			else
+				return [$turnover];
+		}
+
+		if (!$config["auto_turnover"])
+			return [];
+
 		$flts = Flight::GetAll();
 		$turnovers = [];
 
 		foreach ($flts as $flt)
 		{
 			// if origin and destination airports are swapped
-			if ($this->originIcao == $flt->destinationIcao && $this->destinationIcao == $flt->originIcao)
+			if ($this->originIcao != $flt->destinationIcao || $this->destinationIcao != $flt->originIcao)
+				continue;
+
+			$startA = strtotime($this->departureTime);
+			$endA = strtotime($this->arrivalTime);
+			$startB = strtotime($flt->departureTime);
+			$endB = strtotime($flt->arrivalTime);
+			$fltnoA = $this->flightNumber;
+			$fltnoB = $flt->flightNumber;
+
+			// if timeframes are not collapsing
+			if ($startA <= $endB && $endA >= $startB)
+				continue;
+
+			// if flight numbers are 3 characters or longer
+			if (strlen($fltnoA) < 3 || strlen($fltnoB) < 3)
+				continue;
+
+			$fltnoA = substr($fltnoA, 2);
+			$fltnoB = substr($fltnoB, 2);
+
+			// if the trimmed flight numbers are numeric
+			if (!is_numeric($fltnoA) || !is_numeric($fltnoB))
+				continue;
+
+			// if the flight numbers differs with +- 1
+			if ($fltnoA + 1 == $fltnoB || $fltnoA - 1 == $fltnoB)
 			{
-				$startA = strtotime($this->departureTime);
-				$endA = strtotime($this->arrivalTime);
-				$startB = strtotime($flt->departureTime);
-				$endB = strtotime($flt->arrivalTime);
-				$fltnoA = $this->flightNumber;
-				$fltnoB = $flt->flightNumber;
-
-				// if timeframes are not collapsing
-				if (!($startA <= $endB && $endA >= $startB))
-				{
-					// if flight numbers are 3 characters or longer
-					if (strlen($fltnoA) >= 3 && strlen($fltnoB) >= 3)
-					{
-						$fltnoA = substr($fltnoA, 2);
-						$fltnoB = substr($fltnoB, 2);
-
-						// if the trimmed flight numbers are numeric
-						if (is_numeric($fltnoA) && is_numeric($fltnoB))
-						{
-							// if the flight numbers differs with +- 1
-							if ($fltnoA + 1 == $fltnoB || $fltnoA - 1 == $fltnoB)
-							{
-								if ($toJson)
-									$turnovers[] = json_decode($flt->ToJsonLite(), true);
-								else
-									$turnovers[] = $flt;
-							}
-						}
-					}
-				}
+				if ($toJson)
+					$turnovers[] = json_decode($flt->ToJsonLite(), true);
+				else
+					$turnovers[] = $flt;
 			}
 		}
 		return $turnovers;
@@ -858,5 +878,36 @@ class Flight
 			return null;
 
 		return haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
+	}
+
+	public function getSimbriefLink()
+	{
+		if (self::isCommercialCallsign($this->callsign))
+		{
+			$airline = substr($this->callsign, 0, 3);
+			$numbers = substr($this->callsign, 3);
+		}
+		else
+		{
+			$airline = substr($this->callsign, 0, 2);
+			$numbers = substr($this->callsign, 2);
+		}
+
+		$url = sprintf("https://dispatch.simbrief.com/options/custom?airline=%s&fltnum=%s&orig=%s&dest=%s&date=%s&basetype=%s", $airline, $numbers, $this->originIcao, $this->destinationIcao, $this->departureTime, $this->aircraftIcao);
+		if (!empty($this->route)) {
+			$url .= sprintf('&route=%s', $this->route);
+		}
+
+		return $url;
+	}
+
+	public function getOriginWeather(string $type)
+	{
+		return $this->getOrigin()?->getWeather($type);
+	}
+
+	public function getDestinationWeather(string $type)
+	{
+		return $this->getDestination()?->getWeather($type);
 	}
 }

@@ -50,7 +50,7 @@
 								<div class="col-sm-10">
 									<div class="form-row">									
 										<div class="col">
-											<input class="form-control input-uppercase" id="txtSlotAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B738" required maxlength="4">
+											<input class="form-control input-uppercase" id="txtSlotAircraftIcao" type="text" placeholder="ICAO identifier, e.g. B77W" required maxlength="4">
 										</div>
 										<div class="col">
 											<div class="form-check" style="margin-top: 0.4rem">
@@ -66,10 +66,10 @@
 								<div class="col-sm-10">
 									<div class="form-row">									
 										<div class="col">
-											<input class="form-control input-uppercase" id="txtSlotTerminal" type="text" placeholder="Terminal" maxlength="4">
+											<input class="form-control input-uppercase" id="txtSlotTerminal" type="text" placeholder="Terminal" maxlength="10">
 										</div>
 										<div class="col">
-											<input class="form-control input-uppercase" id="txtSlotGate" type="text" placeholder="Gate number" maxlength="4">
+											<input class="form-control input-uppercase" id="txtSlotGate" type="text" placeholder="Gate/stand number" maxlength="10">
 										</div>										
 									</div>
 								</div>
@@ -77,7 +77,7 @@
 							<div class="form-group row">
 								<label class="col-sm-2 col-form-label">Route:</label>
 								<div class="col-sm-10">
-									<input class="form-control input-uppercase" type="text" id="txtSlotRoute">
+									<input class="form-control input-uppercase" type="text" id="txtSlotRoute" placeholder="e.g. GILEP ZOLKU SUNIS DETSA BAKOR M984 EVRIP">
 								</div>
 							</div>
 							<div class="form-group row">
@@ -164,10 +164,8 @@
 					</div>
 
 					<div class="flightCollapses" id="slotCollapses">
-						<button class="btn btn-block btn-light collapsed" data-target="#slotMap" data-toggle="collapse">Show route on map</button>
-						<div class="collapse card card-body" id="slotMap" data-parent="#slotCollapses"><div class="map" id="uiSlotMap"></div></div>
 
-						<button id="btnSlotBriefing" class="btn btn-block btn-light collapsed" data-target="#slotBriefing" data-toggle="collapse">Flight briefing (weather, flight planning)</button>
+						<button id="btnSlotBriefing" class="btn btn-block btn-light collapsed" data-target="#slotBriefing" data-toggle="collapse">Flight briefing</button>
 						<div class="collapse card card-body" id="slotBriefing" data-parent="#slotCollapses">
 <?php global $config; if (!empty($config["wx_url"])) : ?>
 							<p>
@@ -179,10 +177,13 @@
 							<div id="slotWxResult" class="card card-body wxResult"></div>
 <?php endif; ?>
 							<p>
-								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm">SimBrief</a>
-								<a href="http://rfinder.asalink.net/free" target="_blank" class="btn btn-secondary btn-sm">RouteFinder</a>
+								<a href="https://www.simbrief.com/system/dispatch.php?newflight=1" target="_blank" class="btn btn-secondary btn-sm" id="slotSimbrief">SimBrief</a>
 							</p>
+							<div id="slotBriefingText"></div>
 						</div>
+
+						<button class="btn btn-block btn-light collapsed" data-target="#slotMap" data-toggle="collapse">Show route on map</button>
+						<div class="collapse card card-body" id="slotMap" data-parent="#slotCollapses"><div class="map" id="uiSlotMap"></div></div>
 					</div>
 
 					<div class="flighttiles" id="slotBookedBy">

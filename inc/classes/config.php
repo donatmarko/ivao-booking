@@ -53,12 +53,16 @@ class Config
 			if (Config::Write("event_name", $array["event_name"]) == 0 &&
 				Config::Write("mode", $array["mode"]) == 0 &&
 				Config::Write("division_name", $array["division_name"]) == 0 &&
+				Config::Write("division_logo", $array["division_logo"]) == 0 &&
 				Config::Write("division_web", $array["division_web"]) == 0 &&
 				Config::Write("division_email", $array["division_email"]) == 0 &&
 				Config::Write("division_facebook", $array["division_facebook"]) == 0 &&
 				Config::Write("division_discord", $array["division_discord"]) == 0 &&
 				Config::Write("division_instagram", $array["division_instagram"]) == 0 &&
 				Config::Write("wx_url", $array["wx_url"]) == 0 &&
+				Config::Write("discord_webhook_url", $array["discord_webhook_url"]) == 0 &&
+				Config::Write("auto_turnover", $array["auto_turnover"]) == 0 &&
+				Config::Write("time_only_in_list", $array["time_only_in_list"]) == 0 &&
 				Config::Write("date_start", $array["date_start"]) == 0 &&
 				Config::Write("date_end", $array["date_end"]) == 0)
 				return 0;

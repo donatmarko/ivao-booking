@@ -70,12 +70,29 @@ class Slot
 		global $db;
 		$flts = [];
 
-		if ($query = $db->Query("SELECT * FROM slots ORDER BY departure_time, slotbooking_number"))
+		if ($query = $db->Query("SELECT * FROM slots"))
 		{
 			while ($row = $query->fetch_assoc())
 				$flts[] = new Slot($row);
 		}
 		return $flts;
+	}
+
+	/**
+	 * Converts all slots to JSON format
+	 * @return string JSON
+	 */
+	public static function ToJsonAll($full = false)
+	{
+		$slots = [];
+		foreach (Slot::GetAll() as $s)
+		{
+			if ($full)
+				$slots[] = json_decode($s->ToJson(), true);
+			else
+				$slots[] = json_decode($s->ToJsonLite(), true);
+		}
+		return json_encode($slots);
 	}
 
 	/**
@@ -86,39 +103,40 @@ class Slot
 	public static function Create($array)
 	{
 		global $db;
-		if (Session::LoggedIn())
-		{
-			$u = Session::User();
-			if ($db->Query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, NOW())",
-				$array["timeframe_id"],
-				$array["callsign"],
-				$array["origin_icao"],
-				$array["destination_icao"],
-				$array["aircraft_icao"],
-				$array["aircraft_freighter"] == "true",
-				'',
-				'TBD',
-				$array["route"],
-				1,
-				$u->vid
-			))
-			{
-				if (!empty($u->email))
-				{
-					$slot = Slot::Find($db->GetInsertID());
-					$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
-
-					if (Email::Prepare($email, $u->getFullname(), $u->email, "Private slot request"))
-						return 0;
-				}
-				else
-					return 0;
-			}
-		}
-		else
+		if (!Session::LoggedIn())
 			return 403;
 
-		return -1;
+		$tf = Timeframe::Find($array["timeframe_id"]);
+		if ($tf->type == 1 && $array["destination_icao"] != $tf->airportIcao)
+			return 1;
+
+		if ($tf->type == 2 && $array["origin_icao"] != $tf->airportIcao)
+			return 2;
+
+		$u = Session::User();
+		$db->Query("INSERT INTO slots (timeframe_id, callsign, origin_icao, destination_icao, aircraft_icao, aircraft_freighter, terminal, gate, route, booked, booked_by, booked_at) VALUES (§, §, §, §, §, §, §, §, §, §, §, NOW())",
+			$array["timeframe_id"],
+			$array["callsign"],
+			$array["origin_icao"],
+			$array["destination_icao"],
+			$array["aircraft_icao"],
+			$array["aircraft_freighter"] == "true",
+			'',
+			'TBD',
+			$array["route"],
+			1,
+			$u->vid
+		);
+
+		$slot = Slot::Find($db->GetInsertID());
+		discord_slot_message("Slot request is waiting for approval", null, 16755968, $slot);
+
+		if (!empty($u->email))
+		{
+			$email = $slot->EmailReplaceVars(file_get_contents("contents/slot_request.html"));
+			Email::Prepare($email, $u->getFullname(), $u->email, "Private slot request");
+		}
+		return 0;
 	}
 
 	public $id, $timeframeId, $callsign, $aircraftIcao, $aircraftFreighter, $departureTime, $arrivalTime, $originIcao, $destinationIcao, $terminal, $gate, $route, $isArrivalEstimated, $isDepartureEstimated;
@@ -182,7 +200,7 @@ class Slot
 	 */
 	public function getAirline()
 	{
-		if (Flight::isCommercialCallsign($this->callsign))
+		if (is_commercial_callsign($this->callsign))
 			return Airline::Find(substr($this->callsign, 0, 3));
 		return null;
 	}
@@ -205,7 +223,7 @@ class Slot
 		return Airport::Find($this->originIcao);
 	}
 	
-	/**
+		/**
 	 * Creates the content of "position" field to frontend/email
 	 * Terminal or gate = "TBD"
 	 * both empty => question mark / "no data available"
@@ -220,53 +238,52 @@ class Slot
 		if ($graphical)
 		{
 			if (empty($this->terminal) && empty($this->gate))
-				$t = '<span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="No data available"><i class="fas fa-question"></i></span>';
-			else
+				return '<span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="No data available"><i class="fas fa-question"></i></span>';
+
+			if (!empty($this->terminal))
 			{
-				if (!empty($this->terminal))
-				{
-					if ($this->terminal === "TBD")
-						$t = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Terminal: to be determined"><i class="far fa-building"></i> TBD</span> ';
-					else
-						$t = '<span class="badge badge-primary" data-toggle="tooltip" data-placement="top" title="Terminal"><i class="far fa-building"></i> ' . $this->terminal . '</span> ';
-				}
-				if (!empty($this->gate))
-				{
-					if ($this->gate === "TBD")
-						$g = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Gate: to be determined"><i class="fas fa-plane"></i> TBD</span>';
-					else
-						$g = '<span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="Gate"><i class="fas fa-plane"></i> ' . $this->gate . '</span>';								
-				}
-			}						
+				if ($this->terminal === "TBD")
+					$t = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Terminal: to be determined"><i class="far fa-building"></i> TBD</span> ';
+				else
+					$t = '<span class="badge badge-primary" data-toggle="tooltip" data-placement="top" title="Terminal"><i class="far fa-building"></i> ' . $this->terminal . '</span> ';
+			}
+			if (!empty($this->gate))
+			{
+				if ($this->gate === "TBD")
+					$g = '<span class="badge badge-warning" data-toggle="tooltip" data-placement="top" title="Position: to be determined"><i class="fas fa-plane"></i> TBD</span>';
+				else
+					$g = '<span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="Position"><i class="fas fa-plane"></i> ' . $this->gate . '</span>';								
+			}
+
+			return $t . $g;
 		}
+
+
+		if (empty($this->terminal) && empty($this->gate))
+			$t = '(no data available)';
 		else
 		{
-			if (empty($this->terminal) && empty($this->gate))
-				$t = '(no data available)';
-			else
+			if (!empty($this->terminal))
 			{
-				if (!empty($this->terminal))
-				{
-					if ($this->terminal === "TBD")
-						$t = 'Terminal: to be determined ';
-					else
-						$t = 'Terminal: ' . $this->terminal;
-				}
-				if (!empty($this->gate))
-				{
-					if (!empty($t))
-						$t .= ' / ';
+				if ($this->terminal === "TBD")
+					$t = 'Terminal: to be determined ';
+				else
+					$t = 'Terminal: ' . $this->terminal;
+			}
+			if (!empty($this->gate))
+			{
+				if (!empty($t))
+					$t .= ' / ';
 
-					if ($this->gate === "TBD")
-						$g = 'Gate: to be determined';
-					else
-						$g = 'Gate: ' . $this->gate;
-				}
-			}						
-		}
-
+				if ($this->gate === "TBD")
+					$g = 'Position: to be determined';
+				else
+					$g = 'Position: ' . $this->gate;
+			}
+		}						
 		return $t . $g;
 	}
+
 	
 	/**
 	 * Returns the name of the aircraft from the NAV database
@@ -274,15 +291,13 @@ class Slot
 	 */
 	public function getAircraftName()
 	{
-		global $dbNav;
-		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
+		global $db;
+		$query = $db->Query("SELECT * FROM nav_aircrafts WHERE icao = §", $this->aircraftIcao);
+		if ($row = $query->fetch_assoc())
 		{
-			if ($row = $query->fetch_assoc())
-			{
-				if ($this->aircraftFreighter)
-					return sprintf("%s (freighter)", $row["name"]);
-				return $row["name"];
-			}
+			if ($this->aircraftFreighter)
+				return sprintf("%s (freighter)", $row["name"]);
+			return $row["name"];
 		}
 		return "";
 	}
@@ -317,6 +332,7 @@ class Slot
 			"wxUrl" => $config["wx_url"],
 			"greatCircleDistanceNm" => $ori && $des ? haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440) : null,
 			"timeframe" => $timeframe ? json_decode($timeframe->ToJson(), true) : null,
+			"simbriefLink" => $this->getSimbriefLink(),
 		];
 
 		return json_encode(array_merge($slot, $data));
@@ -358,8 +374,9 @@ class Slot
 
 		if (Session::LoggedIn() && ($sesUser->permission > 1 || $sesUser->vid == $this->bookedBy))
 		{
-			if ($db->Query("DELETE FROM slots WHERE id = §", $this->id))
-				return 0;
+			$db->Query("DELETE FROM slots WHERE id = §", $this->id);
+			discord_slot_message("Slot has been deleted", null, 16711680, $this);
+			return 0;
 		}
 		else
 			return 403;
@@ -403,6 +420,7 @@ class Slot
 					$email = $this->EmailReplaceVars(file_get_contents("contents/slot_accepted.html"));
 					Email::Prepare($email, $user->getFullname(), $user->email, "Your slot has been accepted");
 				}
+				discord_slot_message("Slot has been granted", null, 10747648, $this);
 			}
 			else if ($array["booked"] == 0)
 			{
@@ -420,6 +438,7 @@ class Slot
 					$email = str_replace("%slot_rejectMessage%", $rejectMessage, $email);
 					Email::Prepare($email, $user->getFullname(), $user->email, "Your slot has been rejected");
 				}
+				discord_slot_message("Slot request has been rejected", (!empty($array["reject_message"]) ? "Message: ".$array["reject_message"] : '(no message left)'), 16711680, $this);
 				$toBeDeleted = true;
 			}
 			else
@@ -498,27 +517,54 @@ class Slot
 	 */
 	public function getCalculatedEET()
 	{
-		global $dbNav;
+		global $db;
 
 		$ori = $this->getOrigin();
 		$des = $this->getDestination();
 		if (!$ori || !$des)
 			return null;
 
-		$gcd = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
-		$speed = 250;
+		$dist = haversineGreatCircleDistance($ori->latitude, $ori->longitude, $des->latitude, $des->longitude, 3440);
+		$tas = 300;
 
-		if ($query = $dbNav->Query("SELECT * FROM aircrafts WHERE icao = §", $this->aircraftIcao))
+		$query = $db->Query("SELECT * FROM nav_aircrafts WHERE icao = §", $this->aircraftIcao);
+		if ($row = $query->fetch_assoc())
 		{
-			if ($row = $query->fetch_assoc())
-			{
-				if ($row["speed"] > 0)
-					$speed = (int)$row["speed"];
-			}
+			if ($row["speed"] > 0)
+				$tas = (int)$row["speed"];
 		}
 
-		// some correction (for climb and descent)
-		$t = round(($gcd / $speed + 0.66) * 3600);
-		return $t;
+		return calculate_eet($dist, $tas);
+	}
+
+	public function getSimbriefLink()
+	{
+		if (is_commercial_callsign($this->callsign))
+		{
+			$airline = substr($this->callsign, 0, 3);
+			$numbers = substr($this->callsign, 3);
+		}
+		else
+		{
+			$airline = substr($this->callsign, 0, 2);
+			$numbers = substr($this->callsign, 2);
+		}
+
+		$url = sprintf("https://dispatch.simbrief.com/options/custom?airline=%s&fltnum=%s&orig=%s&dest=%s&date=%s&basetype=%s", $airline, $numbers, $this->originIcao, $this->destinationIcao, $this->departureTime, $this->aircraftIcao);
+		if (!empty($this->route)) {
+			$url .= sprintf('&route=%s', $this->route);
+		}
+
+		return $url;	
+	}
+
+	public function getOriginWeather(string $type)
+	{
+		return $this->getOrigin()?->getWeather($type);
+	}
+
+	public function getDestinationWeather(string $type)
+	{
+		return $this->getDestination()?->getWeather($type);
 	}
 }
