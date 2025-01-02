@@ -166,12 +166,17 @@ if (count($apts) > 0)
 				</li>
 				<li class="nav-item">
 					<a class="nav-link text-danger tabFlightlist" data-toggle="tab" href="#arrivals' . $apt->icao . '" role="tab" aria-selected="false"><i class="fas fa-plane-arrival"></i> Arrivals</a>
-				</li>
+				</li>';
+
+		if (count($apt->getTimeframes()) > 0)
+		{
+			echo '
 				<li class="nav-item">
 					<a class="nav-link text-info" href="slots#' . $apt->icao . '" role="tab" aria-selected="true"><i class="fas fa-key"></i> Private slots</a>
-				</li>
-			</ul>
+				</li>';
+		}
 			
+		echo '</ul>
 			<div class="tab-content">' . flightsTable($apt, "departures") . flightsTable($apt, "arrivals") . '</div>';
 		
 		if (count($apts) > 1)

@@ -56,8 +56,12 @@ h3, h4, h5 {
 	padding: 0 0.7em;
 }
 
+#arrDepTab {
+	display: flex;
+}
+
 #arrDepTab > .nav-item {
-	width: 33.33%;
+	flex: 1;
 	text-align: center;
 }
 
