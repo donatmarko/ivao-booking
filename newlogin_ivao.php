@@ -1,4 +1,12 @@
 <?php
+/**
+ * Flight booking system for RFE or similar events.
+ * Created by Donat Marko (IVAO VID 540147) 
+ * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
+ * @author Donat Marko
+ * @copyright 2025 Donat Marko | www.donatus.hu
+ */
+
 session_start();
 define('COOKIE_NAME', 'IVAO_LOGIN');
 require_once 'config-inc.php';
@@ -145,7 +153,7 @@ if (isset($_GET['code']) && isset($_GET['state'])) {
     $base_url = $openid_data['authorization_endpoint'];
     $reponse_type = 'code';
     $scopes = 'profile configuration email';
-    $state = 'rfe-thailand'; // Random string to prevent CSRF attacks
+    $state = bin2hex(random_bytes(length: 32)); // Random string to prevent CSRF attacks
 
     $full_url = "$base_url?response_type=$reponse_type&client_id=$client_id&scope=$scopes&redirect_uri=$redirect_uri&state=$state";
     header('location: ' . $full_url);

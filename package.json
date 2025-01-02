@@ -1,6 +1,6 @@
 {
   "name": "ivao-booking",
-  "version": "0.9.0",
+  "version": "2.0.0",
   "description": "New booking system for IVAO Real Flight Event or similar events by Donat Marko",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
