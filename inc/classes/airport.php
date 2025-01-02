@@ -4,7 +4,7 @@
  * Created by Donat Marko (IVAO VID 540147) 
  * Any artwork/content displayed on IVAO is understood to comply with the IVAO Creative Intellectual Property Policy (https://wiki.ivao.aero/en/home/ivao/intellectual-property-policy)
  * @author Donat Marko
- * @copyright 2024 Donat Marko | www.donatus.hu
+ * @copyright 2025 Donat Marko | www.donatus.hu
  */
 
 /**
