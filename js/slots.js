@@ -79,11 +79,11 @@ function getTimeframe(id)
 					$("#slotRequest").show();
 
 					if (data.type == 2) {
-						$("#txtSrOriginIcao").val("LHBP").prop("disabled", true);
+						$("#txtSrOriginIcao").val(data.airportIcao).prop("disabled", true);
 						$("#txtSrDestinationIcao").val("").prop("disabled", false);
 					} else if (data.type == 1) {
 						$("#txtSrOriginIcao").val("").prop("disabled", false);
-						$("#txtSrDestinationIcao").val("LHBP").prop("disabled", true);
+						$("#txtSrDestinationIcao").val(data.airportIcao).prop("disabled", true);
 					} else {
 						$("#txtSrOriginIcao").val("").prop("disabled", false);
 						$("#txtSrDestinationIcao").val("").prop("disabled", false);
