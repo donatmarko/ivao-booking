@@ -473,4 +473,4 @@ composer.lock
 *.sass.map
 *.scss.map
 
-appsettings.php
+#appsettings.php
