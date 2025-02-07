@@ -1,0 +1,16 @@
+GET https://localhost/api/flights/20250118/ITY123/ HTTP/1.1
+X-Api-Key:
+
+###
+
+
+GET https://localhost/api/flights HTTP/1.1
+X-Api-Key:
+
+
+###
+
+GET https://localhost/api/flights HTTP/1.1
+
+
+###
