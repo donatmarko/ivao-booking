@@ -119,11 +119,6 @@ class EventAirport
 			"granted" => 0
 		];
 
-		foreach (Timeframe::GetAll() as $tf)
-		{
-			$stat["free"] += $tf->count;
-		}
-
 		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM slots GROUP BY booked");
 		while ($row = $query->fetch_assoc())
 		{
@@ -137,6 +132,12 @@ class EventAirport
 					break;
 			}
 		}
+
+		foreach (Timeframe::GetAll() as $tf)
+		{
+			$stat["free"] += $tf->count;
+		}
+		$stat["free"] -= $stat["requested"] + $stat["granted"];
 		return $stat;
 	}
 	
@@ -233,11 +234,6 @@ class EventAirport
 			"granted" => 0,
 		];
 
-		foreach ($this->getTimeframes() as $tf)
-		{
-			$stat["free"] += $tf->count;
-		}
-
 		$query = $db->Query("SELECT booked, COUNT(*) AS num FROM slots WHERE origin_icao = § OR destination_icao = § GROUP BY booked", $this->icao, $this->icao);
 		while ($row = $query->fetch_assoc())
 		{
@@ -251,6 +247,12 @@ class EventAirport
 					break;
 			}
 		}
+
+		foreach ($this->getTimeframes() as $tf)
+		{
+			$stat["free"] += $tf->count;
+		}
+		$stat["free"] -= $stat["requested"] + $stat["granted"];
 		return $stat;
 	}
 
@@ -353,4 +355,3 @@ class EventAirport
 		]);
 	}
 }
-  

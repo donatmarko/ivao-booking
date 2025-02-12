@@ -65,7 +65,7 @@ function statisticLine($airport)
 
 			$result .= '<h5>Private slots</h5>';
 			$ss = EventAirport::getSlotStatisticsAll();
-			$result .= progressBar($ss["granted"] + $ss["requested"], $ss["free"]);
+			$result .= progressBar($ss["granted"], $ss["requested"] + $ss["free"]);
 		}
 		else
 		{
