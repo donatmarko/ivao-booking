@@ -34,6 +34,7 @@ $config["login_bypass_api"]   = false;
  * IVAO SSO parameters.
  * Can be requested through https://developers.ivao.aero/
  */
+define('IVAOSSO_OPENID_URL',     'https://api.ivao.aero/.well-known/openid-configuration');
 define('IVAOSSO_CLIENT_ID',      'your-client-id');
 define('IVAOSSO_CLIENT_SECRET',  'your-client-secret');
 define('IVAOSSO_REDIRECT_URI',   'https://booking.va.ivao.aero/auth/callback');

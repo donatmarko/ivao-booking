@@ -96,6 +96,7 @@ CREATE TABLE `users` (
   `division` varchar(2) NOT NULL,
   `country` varchar(2) NOT NULL,
   `staff` text DEFAULT NULL,
+  `refresh_token` text DEFAULT NULL,
   `permission` int(11) NOT NULL,
   `last_login` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;

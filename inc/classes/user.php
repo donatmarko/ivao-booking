@@ -97,7 +97,7 @@ class User
 	public static function IVAORegister($data)
 	{
 		global $db;
-		$db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, email, division, country, staff, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, NOW(), §)",
+		$db->Query("INSERT INTO users (permission, vid, firstname, lastname, rating_atc, rating_pilot, email, division, country, staff, refresh_token, last_login, privacy) VALUES (§, §, §, §, §, §, §, §, §, §, §, NOW(), §)",
 			1,
 			$data->vid,
 			$data->firstname,
@@ -108,6 +108,7 @@ class User
 			$data->division,
 			$data->country,
 			$data->staff,
+			$data->refreshToken,
 			true
 		);
 		$user = self::FindId($db->GetInsertID());
@@ -129,7 +130,7 @@ class User
 			$db->Query("UPDATE users SET permission = 2 WHERE vid = §", $data->vid);
 		}
 
-		$db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, last_login = NOW() WHERE vid = §",
+		$db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, refresh_token = §, last_login = NOW() WHERE vid = §",
 			$data->firstname,
 			$data->lastname,
 			$data->ratingatc,
@@ -137,6 +138,7 @@ class User
 			$data->division,
 			$data->country,
 			$data->staff,
+			$data->refreshToken,
 			$data->vid
 		);
 

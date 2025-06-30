@@ -37,6 +37,7 @@ class Session
 			$_SESSION["LOGIN"]->division = "VA";
 			$_SESSION["LOGIN"]->country = "VA";
 			$_SESSION["LOGIN"]->staff = "VA-DIR:VA-TC";
+			$_SESSION["LOGIN"]->refreshToken = null;
 		}
 				
 		if ($_SESSION["LOGIN"]->vid)

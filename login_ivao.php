@@ -38,6 +38,7 @@ if (isset($_COOKIE[COOKIE_NAME]))
 	
 	if ($user_array->result == 1)
 	{
+		$user_array["refreshToken"] = null;
 		$_SESSION["LOGIN"] = $user_array;
 		header('Location: ' . $_GET["url"] . '/login');
 	}
