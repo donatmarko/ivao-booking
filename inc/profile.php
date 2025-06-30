@@ -70,9 +70,9 @@
 		<h5>Why do we store your email address during the event?</h5>
 		<p>Your email address is stored to enable us to contact you with updates, confirmations, and important announcements related to IVAO Real Flight Events (RFE).</p>
 
-		<h5>Who processes your email?</h5>
+		<h5>Who handles your personal data?</h5>
 		<p>
-			IVAO (International Virtual Aviation Organisation) and its authorized representatives handle your email securely. 
+			Your personal information (including email address) is handled securely by IVAO (International Virtual Aviation Organisation) and its authorized representatives.
 			We strictly adhere to confidentiality and data protection regulations in the management of your information.
 		</p>
 
