@@ -102,8 +102,8 @@ class User
 			$data->vid,
 			$data->firstname,
 			$data->lastname,
-			$data->ratingatc,
-			$data->ratingpilot,
+			$data->ratingATC ?? $data->ratingatc,      // from legacy login API
+			$data->ratingPilot ?? $data->ratingpilot,  // from legacy login API
 			$data->email ?? '',
 			$data->division,
 			$data->country,
@@ -133,15 +133,14 @@ class User
 		$db->Query("UPDATE users SET firstname = §, lastname = §, rating_atc = §, rating_pilot = §, division = §, country = §, staff = §, refresh_token = §, last_login = NOW() WHERE vid = §",
 			$data->firstname,
 			$data->lastname,
-			$data->ratingatc,
-			$data->ratingpilot,
+			$data->ratingATC ?? $data->ratingatc,      // from legacy login API
+			$data->ratingPilot ?? $data->ratingpilot,  // from legacy login API
 			$data->division,
 			$data->country,
 			$data->staff,
 			$data->refreshToken,
 			$data->vid
 		);
-
 		// discord_user_message("User logged in", 44543, $data);
 	}
 
@@ -159,14 +158,14 @@ class User
 		return json_encode($users);
 	}
 
-	public $id, $vid, $firstname, $lastname, $ratingAtc, $ratingPilot, $division, $country, $staff, $permission, $email, $privacy;
+	public $id, $vid, $firstname, $lastname, $ratingATC, $ratingPilot, $division, $country, $staff, $permission, $email, $privacy;
 	public function __construct($row)
 	{
 		$this->id = (int)$row["id"];
 		$this->vid = (int)$row["vid"];
 		$this->firstname = $row["firstname"];
 		$this->lastname = $row["lastname"];
-		$this->ratingAtc = (int)$row["rating_atc"];
+		$this->ratingATC = (int)$row["rating_atc"];
 		$this->ratingPilot = (int)$row["rating_pilot"];
 		$this->division = $row["division"];
 		$this->country = $row["country"];
@@ -182,7 +181,7 @@ class User
 	 */
 	public function getAtcBadge()
 	{
-		return sprintf('<img src="https://www.ivao.aero/data/images/ratings/atc/%s.gif" alt="" class="img-fluid"> ', $this->ratingAtc);
+		return sprintf('<img src="https://www.ivao.aero/data/images/ratings/atc/%s.gif" alt="" class="img-fluid"> ', $this->ratingATC);
 	}
 	
 	/**

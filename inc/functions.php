@@ -219,7 +219,7 @@ function discord_user_message($title, $color, $user)
 		],
 		[
 			"name" => "Rating",
-			"value" => User::RATINGS_ATC[$user->ratingAtc].'/'.User::RATINGS_PILOT[$user->ratingPilot],
+			"value" => User::RATINGS_ATC[$user->ratingATC].'/'.User::RATINGS_PILOT[$user->ratingPilot],
 			"inline" => true,
 		],
 	];
